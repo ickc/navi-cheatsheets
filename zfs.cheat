@@ -1,0 +1,49 @@
+% zfs
+
+# zfs:all — show all zfs info
+sudo -v && eval printf %.0s= '{1..'"${COLUMNS:-$(tput cols)}"'}' && sudo zpool status && eval printf %.0s= '{1..'"${COLUMNS:-$(tput cols)}"'}' && sudo zpool iostat && eval printf %.0s= '{1..'"${COLUMNS:-$(tput cols)}"'}' && sudo zpool list && eval printf %.0s= '{1..'"${COLUMNS:-$(tput cols)}"'}' && sudo zfs list
+
+# zfs:im — import a ZFS pool
+if [[ $(uname) == Darwin ]]; then base=/var/run; else base=/dev; fi && sudo zpool import -f -l -d $base/disk/by-id <name> && sudo zpool status
+$ name: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
+
+# zfs:ex — export a ZFS pool
+sudo zpool export <name> && sudo zpool status
+$ name: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
+
+# zfs:arc — show ARC stats
+cat /proc/spl/kstat/zfs/arcstats
+
+# zfs:ls — list ZFS snapshots
+sudo zfs list -t snapshot
+
+# zfs:ss — create ZFS snapshot
+sudo zfs snapshot <name>
+
+# zfs:show:compress — get compression stats
+sudo zfs get compression -r
+
+# zfs:sdrc — ZFS send and receive
+sudo zfs send <input>/@<snapshot> | sudo zfs receive <output>/
+$ input: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
+$ output: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
+
+# zfs:version — check zfs version
+if [[ $(uname) == Darwin ]]; then sysctl -a | grep -E '(zfs|spl)\.kext'; else sudo zfs --version; fi
+
+# zfs:space — show zfs space usage, sort by snapshot usage
+sudo zfs list -o space | sort -hk4
+
+# zfs:size — show zfs dataset sizes in bytes
+sudo zfs get -o name,value -Hp used
+
+# zfs:autoexpand — set zpool to auto-expand
+sudo zpool set autoexpand=on <pool>
+$ pool: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
+
+# zfs:get — get zpool properties
+sudo zpool get <property>
+$ property: echo -e " \nautoexpand"
+
+# zfs:video:link — create video symlinks
+(cd /Volumes; sudo ln -s RAIDZ48TB/Videos .; sudo ln -s RAIDZ48TB/Videos-original .; sudo ln -s RAIDZ48TB/Videos-original-archive/ .)

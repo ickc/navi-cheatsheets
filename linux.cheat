@@ -1,0 +1,116 @@
+% linux, mount
+
+# ls:mount — List mount points
+mount -l
+
+# ls:id — list block devices by id
+ls -la /dev/disk/by-id/
+
+% linux, users
+
+# ls:group — List group members.
+getent group | cut -d: -f1
+
+% linux, power
+
+# lidswitch:ignore — ignore lid-switch, e.g. on laptop.
+sudo sh -c 'echo "HandleLidSwitch=ignore" >> /etc/systemd/logind.conf' && sudo service systemd-logind restart
+
+% linux, network
+
+# netctl:start — start a WiFi profile
+sudo netctl start <profile>
+
+$ profile: echo -e "wlp1s0-rt"
+
+# timedatectl:status — check time synchronization status
+timedatectl status
+
+# ip:interface — self-assign an IP to an interface, set MTU
+sudo ip link set <interface> mtu <mtu> && sudo ip address add <ip>/24 broadcast + dev <interface>; ip address; ethtool <interface>
+
+$ interface: echo -e "enx245ebe399ef8"
+$ mtu: echo -e "9000"
+
+% linux, inotify
+
+# inotify — refresh inotify and show the before and after change; restart dropbox service
+sysctl fs.inotify; sudo sysctl -p; sysctl fs.inotify; sudo systemctl restart dropbox@kolen.service && sudo systemctl restart system-dropbox.slice
+
+% linux, display
+
+# xrandr — change resolution and/or framerate
+xrandr --output <output> --mode <resolution> -r <framerate>
+
+$ output: echo -e "HDMI-2\nHDMI-3"
+$ resolution: echo -e "1920x1080\n3840x2160"
+$ framerate: echo -e "23.98\n24.00\n29.97\n30.00\n59.97\n60.00"
+
+% linux, kernel
+
+# ls:kernel — list installed kernel in Debian
+dpkg --list | grep linux-image
+
+% linux, filesystem
+
+# mkfs:xfs — use the full device and format to XFS
+sudo parted /dev/<device> --script mklabel gpt mkpart XFS 0% 100% && sudo mkfs.xfs -s size=4096 /dev/<partition>
+
+# mkfs:fat — use the full device and format to FAT32
+sudo parted /dev/<device> --script mklabel msdos mkpart primary FAT32 0% 100% && sudo mkfs.fat -F 32 /dev/<partition>
+
+# mkfs:exfat — use the full device and format to exFAT
+sudo parted /dev/<device> --script mklabel gpt mkpart EXFAT 0% 100% && sudo mkfs.exfat /dev/<partition>
+
+# mount — mount a filesystem
+sudo mount -o uid=$(id -u),gid=$(id -g) /dev/<device> <mountpoint>
+
+# mount:exfat — mount an exFAT filesystem
+sudo mount -t exfat -o uid=$(id -u),gid=$(id -g) /dev/<device> <mountpoint>
+
+% linux, udev
+
+# dev:info — show udev info for a device
+udevadm info --query=all --name=/dev/<device>
+
+% linux, virtualization
+
+# detect:vm — determine if running in a VM without sudo; if not a VM, return none.
+systemd-detect-virt
+
+% linux, terminal
+
+# linux:update:terminal — choose the default terminal emulator when Ctrl-Alt-T is pressed.
+sudo update-alternatives --config x-terminal-emulator
+
+% linux, firewall
+
+# firewall-cmd:ls — list firewall rules using firewall-cmd
+sudo firewall-cmd --list-ports
+
+# firewall-cmd:remove — remove a port from the firewall
+sudo firewall-cmd --remove-port=<port>/<protocol> --permanent
+
+$ protocol: echo -e "tcp\nudp"
+
+# firewall-cmd:add — add a port to the firewall
+sudo firewall-cmd --add-port=<port>/<protocol> --permanent
+
+$ protocol: echo -e "tcp\nudp"
+
+# firewall-cmd:make-permanent — make firewall rules permanent
+sudo firewall-cmd --runtime-to-permanent
+
+# firewall-cmd:ls:all — list all firewall rules
+sudo firewall-cmd --list-all
+
+# firewall-cmd:reload — reload firewall rules
+sudo firewall-cmd --reload
+
+% linux, hardware
+
+# mce:summary — show Machine Check Exception summary
+sudo ras-mc-ctl --summary
+
+# mce:error_count — show Machine Check Exception error count
+sudo ras-mc-ctl --error-count

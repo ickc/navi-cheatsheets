@@ -1,0 +1,151 @@
+% gitit, serve
+
+# gitit:serve — find gitit's conf file and serve it
+dir="$(find -name _default.conf -exec dirname {} +)"; subdir="$(basename "$dir")"; cd "$dir/.." && gitit -f "$subdir/_default.conf"
+
+% cleanup, cache, python, sass
+
+# clear:cache — clear commonly found cache stuffs in git repositories that should be completely safe to remove
+find -type d \( -name __pycache__ -o -name .mypy_cache -o -name .tox -o -name .pytest_cache -o -name .ipynb_checkpoints -o -name '*.egg-info' -o -name .sass-cache \) -exec rm -rf {} +; find -type f \( -name '.coverage*' -o -name '*.pyc' \) -delete
+
+# clean:all — clean all common auxiliary files
+navi --query "find:ds_store" --best-match; navi --query "find:conflict" --best-match; navi --query "fd:rm:ipycp" --best-match; navi --query "fd:rm:py:aux" --best-match
+
+% pandoc, markdown
+
+# pandoc:cleanup:md — cleanup markdown files using pandoc
+pandoc -s -o '<filename>' '<filename>' -f markdown+abbreviations+autolink_bare_uris+markdown_attribute+mmd_header_identifiers+mmd_link_attributes+mmd_title_block+tex_math_double_backslash-latex_macros -t markdown+raw_tex-native_spans-simple_tables-multiline_tables-grid_tables-latex_macros -s --wrap=none --column=999 --atx-headers --reference-location=block --file-scope
+
+# pandoc:convert — Convert using pandoc with sensible defaults
+filename='<filename>'
+pandoc \
+  --toc \
+  --toc-depth=6 \
+  --pdf-engine=lualatex \
+  -M mainfont='TeX Gyre Schola' \
+  -M mathfont='TeX Gyre Schola Math' \
+  -M fontsize=10pt \
+  -M hyperrefoptions=bookmarksnumbered \
+  -M hyperrefoptions=pdfpagelabels \
+  -M hyperrefoptions=pagebackref \
+  -M hyperrefoptions='hypertexnames=false' \
+  -M hyperrefoptions='linktocpage=true' \
+  -M colorlinks \
+  -M linkcolor=blue \
+  -M filecolor=blue \
+  -M citecolor=blue \
+  -M urlcolor=blue \
+  -M toccolor=blue \
+  -M documentclass=memoir \
+  -M classoption=article \
+  -M geometry='inner=0.5in, outer=0.5in, top=0.5in, bottom=0.75in' \
+  --standalone \
+  --output="${filename%.*}.<ext>" \
+  "$filename"
+
+% minify, html
+
+# minify — minify (written in go)
+minify --html-keep-document-tags --html-keep-end-tags --type=html -o <filename> <filename>
+
+% ffmpeg, video, lut, audio
+
+# ffmpeg:lut — ffmpeg to apply LUT and normalize audio
+ffmpeg -i <input> -filter:v lut3d=<LUT> -filter:a loudnorm <output>
+
+% ffmpeg, video, frames
+
+# ffmpeg:nb_frames — use ffprobe to find total no. of frames
+ffprobe -select_streams v -show_streams "<file>" 2> /dev/null | grep nb_frames
+
+# ffmpeg:extract:frame — use ffmpeg to extract one frame
+ffmpeg -ss <timecode> -i <input> -frames:v 1 <output>
+
+% mediainfo, video, frames
+
+# mediainfo:count — count no. of frames using mediainfo
+mediainfo --fullscan "<file>" | grep "Frame count"
+
+% f3, flash, storage
+
+# f3:check — use f3 to check memory cards
+f3probe --destructive --time-ops <disk>
+
+# f3:io — use f3 to perform full read write cycle test
+f3write <diskMount> && f3read <diskMount>
+
+% macos, spotlight, indexing
+
+# prevent:spotlight — do not allow macOS to index current directory. Hint: cd to external drive directory first
+touch .metadata_never_index
+
+# prevent:dss — prevent macOS generating .DS_Store on network drives
+defaults write com.apple.desktopservices DSDontWriteNetworkStores true
+
+% youtube, download
+
+# youtube-dlp — download video with subtitles, retrying indefinitely
+until <ydl> --write-sub --all-subs "<url>" -o "<filename>.%(ext)s" -R infinite; do echo repeating...; done
+
+$ ydl: echo -e "youtube-dl\nyt-dlp"
+
+% system, cache, cpu
+
+# get:cacheline — get the cacheline length in bytes
+if [[ "$(uname)" == Darwin ]]; then sysctl hw.cachelinesize; else getconf LEVEL1_DCACHE_LINESIZE; fi
+
+% kitty, theme
+
+# kitty:solarized:dark — change kitty theme to solarized dark. (Ctrl+Cmd+, to reload)
+rm -f ~/.config/kitty/current-theme.conf; ln -s themes/Solarized_Dark_Official.conf ~/.config/kitty/current-theme.conf
+
+# kitty:solarized:light — change kitty theme to solarized light. (Ctrl+Cmd+, to reload)
+rm -f ~/.config/kitty/current-theme.conf; ln -s themes/Solarized_Light_Official.conf ~/.config/kitty/current-theme.conf
+
+% imagemagick, image
+
+# image:trim — trim all white spaces around images
+mogrify -trim *.<ext>
+
+$ ext: echo -e "png\njpg"
+
+% ffmpeg, audio, wav
+
+# ffmpeg:to:wav — use ffmpeg to convert media to wav
+ffmpeg -i '<input>' -ar 16000 -ac 1 -c:a pcm_s16le '<output>.wav'
+
+% afconvert, audio, wav, macos
+
+# apple:to:wav — use afconvert to convert media to wav
+afconvert -f WAVE -d LEI16 '<input>' '<output>.wav'
+
+% whisper, speech, model
+
+# download:whisper:model — Download whisper model
+(cd ~/.local/share/whisper-cpp; whisper-cpp-download-ggml-model <model>)
+
+$ model: echo -e "large-v3-turbo-q5_0"
+
+# whisper — whisper to convert wav into vtt
+command time -v whisper-cli \
+  --threads $(nproc) \
+  --max-context 224 \
+  --best-of 5 \
+  --beam-size 5 \
+  --entropy-thold 3.2 \
+  --output-vtt \
+  --output-file '<output>' \
+  --print-progress \
+  --language <lang> \
+  <translate>  \
+  --model ~/.local/share/whisper-cpp/ggml-<model>.bin \
+  --file '<intermediate>.wav'
+
+$ lang: echo -e "en\nzh"
+$ translate: echo -e "--translate\n "
+$ model: echo -e "large-v3-turbo-q5_0"
+
+% vtt, transcript, text
+
+# vtt:to:txt — convert vtt to txt
+~/git/private/rewind-whisper/src/vtt2txt.py '<file>.vtt' -o '<file>.txt'

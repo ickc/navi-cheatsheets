@@ -1,0 +1,57 @@
+% ssh, tunnel
+
+# ssh:tunnel — tunnel a port from client to server.
+ssh -N -<direction> localhost:<port>:localhost:<port> <URL>
+
+; R to reverse
+$ direction: echo -e "L\nR"
+; 8080-snakeviz; 8989-Jupyter; 8096-emby; 52698-rmate.
+$ port: echo -e "8080\n8989\n8096\n52698"
+
+% rsync
+
+# rsync — rsync with common excludes
+rsync -avmz <DELETE> --stats --cvs-exclude --exclude='.DS_Store' --exclude .git/ --exclude .gitignore <inDir> <outDir>
+
+$ DELETE: echo -e " \n--delete"
+
+# rsync:to — rsync to remote host
+rsync -avmz <DELETE> --stats -e ssh --cvs-exclude --exclude='.DS_Store' --exclude .git/ --exclude .gitignore <inDir> <host>:<outDir>
+
+$ DELETE: echo -e " \n--delete"
+
+# rsync:fm — rsync from remote host
+rsync -avmz <DELETE> --stats -e ssh --cvs-exclude --exclude='.DS_Store' --exclude .git/ --exclude .gitignore <host>:<inDir> <outDir>
+
+$ DELETE: echo -e " \n--delete"
+
+% sshfs
+
+# sshfs:mkdir — create mount point directory
+sudo mkdir -p /mnt/<host>/
+
+$ host: echo -e "gordita\nlpc"
+
+# sshfs:umount — unmount sshfs mount
+sudo umount -f /mnt/<host>/
+
+$ host: echo -e "gordita\nlpc"
+
+# sshfs:kill — kill all sshfs processes
+sudo pkill -9 sshfs
+
+# sshfs:pgrep — show running sshfs processes.
+pgrep -lf sshfs
+
+% ssh, keygen
+
+# ssh:remove:host_key — remove a host key, e.g. when you see the following message - Host key for <host> has changed and you have requested strict checking.
+ssh-keygen -R <host>
+
+% wake
+
+# wake — wake on LAN
+wakeonlan <address> || wol <address>
+
+; 1: lpc, 2: server, 3: 3650
+$ address: echo -e "1c:1b:0d:ec:19:de\nD0:50:99:C0:50:BA\nF4:8E:38:B4:42:11"

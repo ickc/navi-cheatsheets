@@ -1,0 +1,137 @@
+% git, log
+
+# git:log:author — show commit count per author
+git shortlog -s
+
+# git:log:email — list all author name/email pairs
+git log --all --format='%aN <%cE>' | sort -u
+
+% git, diff
+
+# git:diff — show diff except deleted files
+git diff --name-status --diff-filter=d <tobranch>..<frombranch>
+
+% git, clone
+
+# git:clone — git clone from GitHub through ssh
+git clone git@github.com:<user>/<repo>.git
+
+% git, remote
+
+# git:remote:add — add a remote
+git remote add <remote> <URL>
+
+% git, submodule
+
+# git:submodule:update — update submodules recursively
+git submodule update --init --recursive --remote
+
+# git:submodule:reset — reset the submodule status, useful when it is dirty
+git submodule foreach --recursive git checkout .
+
+% git, reset
+
+# git:reset:remote — override local branch from remote
+git fetch <remote> && git reset --hard <remote>/<branch>
+
+# git:reset:upstream — reset branch at origin from remote (e.g. origin is forked from an upstream remote)
+git fetch <remote> && git checkout <branch> && git reset --hard <remote>/<branch> && git push origin <branch> --force
+
+$ remote: echo -e "upstream"
+$ branch: echo -e "master"
+
+# git:reset:all — remove changes and untracked files
+git reset --hard && git clean -d -f
+
+# git:reset:from:remote — force pull from a branch from remote
+git reset --hard <remote>/<branch>
+
+$ remote: echo -e "origin"
+$ branch: echo -e "master\nmain"
+
+% git, merge
+
+# git:merge:upstream — merge from upstream
+git fetch <remote> && git <strategy> <remote>/<branch>
+
+$ remote: echo -e "upstream"
+$ strategy: echo -e "rebase\nmerge"
+$ branch: echo -e "master"
+
+# git:fastforward:upstream — fastforward to upstream's branch
+git fetch <remote> && git checkout <branch> && git merge --ff-only <remote>/<branch> && git push
+
+$ remote: echo -e "upstream"
+$ branch: echo -e "main"
+
+% git, branch
+
+# git:rm:branch — remove a git branch both locally and remotely
+git branch -D <branch> && git push origin :<branch>
+
+% git, tag
+
+# git:rm:tag — remove a git tag both locally and remotely
+git tag -d <tag> && git push origin :<tag>
+
+% git, cherry-pick
+
+# git:cherrypick — git cherry-pick a range
+git cherry-pick '<from>^..<to>'
+
+% git, batch
+
+# git:batch:recursive — batch pull/push at all repositories recursively
+find . -type d -name '.git' -print0 | xargs -0 -n1 -P100 bash -c 'cd $0/.. && until git <action>; do echo retry git <action> $0 in 60s...; sleep 60; done'
+
+$ action: echo -e "pull\npush"
+
+# git:batch:level — batch pull/push at all repositories at a certain level
+level=$((<level> + 1)); find . -maxdepth $level -mindepth $level -type d -name '.git' -print0 | xargs -0 -n1 -P100 bash -c 'cd $0/.. && until git <action>; do echo retry git <action> $0 in 60s...; sleep 60; done'
+
+$ action: echo -e "pull\npush"
+
+# git:batch:level:debug — batch pull/push at all repositories at a certain level (serial, verbose)
+level=$((<level> + 1)); find . -maxdepth $level -mindepth $level -type d -name '.git' -print0 | xargs -0 -n1 -P1 bash -c 'echo $0 && cd $0/.. && git <action>'
+
+$ action: echo -e "pull\npush"
+
+# git:reset:batch — batch reset at all repositories at a certain level
+level=$((<level> + 1)); find . -maxdepth $level -mindepth $level -type d -name '.git' -print0 | xargs -0 -n1 -P0 bash -c 'cd $0/.. && git reset --hard && git clean -d -f'
+
+# git:stat — show number of git repos at a certain level
+level=$((<level> + 1)); find . -mindepth $level -mindepth $level -type d -name .git | sed -E 's/^\.\/([^/]+)\/.*$/\1/' | sort | uniq -c | sort -n
+
+% git, push
+
+# git:push:merge — git push then checkout then merge then push
+git checkout <from> && git push && git checkout <to> && git merge --no-edit <from> && git push
+
+$ from: echo -e "master"
+$ to: echo -e "gh-pages"
+
+# git:force:push — force push to remote
+git push -f
+
+% git, commit
+
+# git:undo — undo last commit while keeping change
+bash -c 'git reset HEAD^'
+
+# git:commit:all — commit all staged and unstaged changes
+git add -A && git commit
+
+% git, ssh
+
+# git:remove:domain — remove domain from known hosts, useful when their signature changed
+ssh-keygen -R <domain>
+
+% git, pull
+
+# git:force:pull — git pull while ignoring local changes
+git fetch --all && git reset --hard origin/master && git pull
+
+% git, worktree
+
+# git:create:workingtree — create a new branch based on current branch and create working tree at ../<name>
+git worktree add -b '<name>' '../<name>' && cd '../<name>'

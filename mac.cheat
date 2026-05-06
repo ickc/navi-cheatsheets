@@ -1,0 +1,87 @@
+% mac
+
+# kext — list loaded 3rd party kexts
+kextstat | grep -v com.apple | sort -bk 6
+
+# log:sleep — grep the log for wake reasons
+pmset -g log | grep -iEe "(Wake|Sleep).*due to"
+
+# restart — restart macOS without asking for FileVault decryption again
+sudo fdesetup authrestart
+
+# default:show:hidden — show hidden files in macOS Finder
+defaults write com.apple.Finder AppleShowAllFiles true && killall Finder
+
+# list:metadata — list all metadata of a file in macOS
+mdls "<file>"
+
+# list:xattr — list all xattr of a file in macOS
+xattr -l "<file>"
+
+# list:shared:by:me — list all iCloud files that is "Shared by Me"
+mdfind -onlyin "<dir>" 'kMDItemIsShared == 1'
+$ dir: echo -e "$HOME/Library/Mobile Documents/"
+
+# check:default:content:type — check macOS file content type
+mdls -name kMDItemContentType <file>
+
+# default:open — default opening plain-text by vscode
+~/git/source/bootstrapping-os-environments/macOS/default-open.sh
+
+# default:show — show default handlers for different UTIs and extensions
+defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers
+
+# default:reload — rebuild Launch Services Database
+/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -kill -r -domain u -domain s -domain l -va
+
+# ibooks:path — go to iBooks PDF location
+cd "$HOME/Library/Mobile Documents/iCloud~com~apple~iBooks/Documents"
+
+% mac, spotlight
+
+# disable:indexing — disable indexing and searching for a drive
+sudo mdutil -i off -d '/Volumes/<name>'; <sudo> touch '/Volumes/<name>/.metadata_never_index'; <sudo> rm -rf '/Volumes/<name>/.fseventsd' '/Volumes/<name>/.Spotlight-V100'
+$ sudo: echo -e " \nsudo"
+
+# delete:spotlight — delete all .Spotlight-V100 & .fseventsd recursively
+find \( -name .Spotlight-V100 -o -name .fseventsd \) -exec rm -rf {} +
+
+# prevent:spotlight — do not allow macOS to index current directory
+touch .metadata_never_index
+
+% mac, application
+
+# identify:dynamic:desktop — identify how many frames are in dynamic desktop
+(export padlength=<padlength>; padlimit=$COLUMNS; pad=$(printf '%*s' "$padlimit"); export pad=${pad// /-}; find -iname '*.heic' -exec bash -c 'count=$(identify "$0" | wc -l); nameLength=$(echo "$0" | wc -L); printf "%s %*.*s %sx%s\n" "$0" 0 $((padlength - $nameLength - ${#count} )) "$pad" "$count" "$(exiftool -ImageSize "$0" | cut -d'"'"':'"'"' -f 2)"' {} \;)
+$ padlength: echo -e "60"
+
+# application:stat:plain — statistics of application arch-kind
+system_profiler SPApplicationsDataType | grep 'Kind: ' | sort | uniq -c | sort -n
+
+# application:stat:json — statistics of application arch-kind using json
+system_profiler -json SPApplicationsDataType | grep '"arch_kind"' | sort | uniq -c | sort -n
+
+# application:stat:xml — statistics of application arch-kind using xml
+system_profiler -xml SPApplicationsDataType | grep -A 1 '<key>arch_kind</key>' | sort | uniq -c | sort -n
+
+% mac, disk
+
+# diskutil:list — list all disks
+diskutil list
+
+# diskutil:partition:disk — format disk
+diskutil partitionDisk '/dev/disk<N>' GPT JHFS+ '<name>' 100%
+
+# format:disk — list disks then format
+diskutil list; diskutil partitionDisk '/dev/disk<N>' GPT JHFS+ '<name>' 100%
+
+# erase:fat — erase disk in FAT format
+diskutil unmountDisk /dev/disk<N>; diskutil eraseDisk FAT32 <name> MBRFormat /dev/disk<N>
+
+% mac, misc
+
+# zerotier:restart — restart zerotier one on macOS
+sudo launchctl stop /Library/LaunchDaemons/com.zerotier.one.plist && sudo launchctl start /Library/LaunchDaemons/com.zerotier.one.plist
+
+# mac:clean — clean macOS caches
+rm -rf ~/Library/Caches/; mkdir -p ~/Library/Caches/

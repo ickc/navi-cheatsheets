@@ -1,0 +1,7 @@
+% jekyll, serve
+
+# serve — jekyll serve using bundle
+<ENV> bundle exec jekyll serve --profile --drafts --incremental
+
+; Environment Variable
+$ ENV: echo -e " \nJEKYLL_ENV=production"

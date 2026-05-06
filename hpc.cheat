@@ -1,0 +1,46 @@
+% hpc, module
+
+# module:gnu — swap to GNU programming environment
+module swap PrgEnv-intel PrgEnv-gnu
+
+# module:intel — swap to Intel programming environment
+module swap PrgEnv-gnu PrgEnv-intel
+
+# module:py2 — load Python 2.7 Anaconda module
+module load python/2.7-anaconda-4.4
+
+# module:py3 — load Python 3.6 Anaconda module
+module load python/3.6-anaconda-4.4
+
+# module:cuda — load CUDA module
+module load cuda
+
+% hpc, slurm
+
+# squeue:sqs:o — squeue sqs (short format)
+partition='<partition>'; <watch> 'squeue -o "%16i %2t %9u %12j  %5D %.10l %.10M  %20V %15q %20S %14f %15R" <partition> <me>'
+
+$ partition: echo -e "-M escori -p bigmem\n"
+$ watch: echo -e "watch -n 15\nbash -c"
+$ me: echo -e "--me\n"
+
+# squeue:sqs:O — squeue sqs (long format)
+partition='<partition>'; <watch> 'squeue -O "JobID:17,StateCompact:3,UserName:10,Name:25,NumNodes:6,TimeLimit:.11,TimeUsed:.11,SubmitTime:21,QOS:16,StartTime:21,Feature:15,ReasonList:16" <partition> <me>'
+
+$ partition: echo -e "-M escori -p bigmem\n"
+$ watch: echo -e "watch -n 15\nbash -c"
+$ me: echo -e "--me\n"
+
+# sbatch — sbatch in parallel
+find . -name '*.sh' | sort | xargs -i -n1 -P30 bash -c 'sbatch $0; sleep 5' {}
+
+# tail:stdout — tail and follow stdout/stderr files
+tail -n 100 -f <prefix><jobid>.out <prefix><jobid>.err
+
+% hpc, ssl
+
+# pkcs12:split:cert — split a PKCS 12 bundle into a certificate and a key. Import password needed.
+openssl pkcs12 -in <certBundle>.p12 -clcerts -nokeys -out <cert>.pem
+
+# pkcs12:split:key — split a PKCS 12 bundle into a certificate and a key. Import password needed. New PEM pass phrase needed.
+openssl pkcs12 -in <certBundle>.p12 -nocerts -out <key>.pem

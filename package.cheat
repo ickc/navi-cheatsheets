@@ -1,0 +1,497 @@
+% package, suse
+
+# suse:search — search for packages on SUSE
+zypper search <package>
+
+# suse:provide — check what package provides this executables
+zypper what-provides <executable>
+
+# suse:info — get info about a package
+zypper info <package>
+
+# suse:require — list dependencies of a package
+zypper info --requires <package>
+
+# suse:install — install packages on SUSE
+sudo transactional-update pkg install <package>
+
+# suse:remove — uninstall packages on SUSE
+sudo transactional-update pkg remove <package>
+
+# suse:ls:all — list all installed packages on SUSE
+zypper se --installed-only
+
+# suse:ls:available — list all available packages
+zypper se
+
+# suse:ls:repo — list all enabled repos
+zypper lr
+
+# suse:update:all — update packages on SUSE
+sudo transactional-update up
+
+# suse:clean — clean cache
+sudo transactional-update cleanup
+
+# suse:command-not-found — lookup the package that contains it
+cnf <command>
+
+% package, rhel
+
+# rhel:search — search for packages on RHEL
+dnf search <package>
+
+# rhel:provide — check what package provides this executables
+dnf provides <executable>
+
+# rhel:info — get info about a package
+dnf info <package>
+
+# rhel:require — list dependencies of a package
+dnf repoquery --requires <package>
+
+# rhel:whatrequire — list reverse dependencies of a package
+dnf repoquery --alldeps --whatrequires <package>
+
+# rhel:install — install packages on RHEL
+sudo dnf install <package>
+
+# rhel:remove — uninstall packages on RHEL
+sudo dnf remove <package>
+
+# rhel:remove:orphan — remove orphan packages on RHEL
+sudo dnf autoremove
+
+# rhel:ls — list user installed packages on RHEL
+dnf history userinstalled
+
+# rhel:ls:all — list all installed packages on RHEL
+dnf list installed
+
+# rhel:ls:available — list all available packages
+dnf list available
+
+# rhel:ls:repo — list all enabled repos
+dnf repolist
+
+# rhel:update — update a package on RHEL
+sudo dnf update <package>
+
+# rhel:update:all — update packages on RHEL
+sudo dnf upgrade --refresh
+
+# rhel:clean — Performs cleanup of temporary files kept for repositories. This includes any such data left behind from disabled or removed repositories as well as for different distribution release versions.
+sudo dnf clean all
+
+# rhel:ls:subscription — check if valid RHEL subscription exists
+sudo subscription-manager list --installed
+
+% package, rpm
+
+# rpm:fingerprint — show all gpg fingerprints
+rpm -q gpg-pubkey --qf '%{NAME}-%{VERSION}-%{RELEASE}\n' | while read key; do echo "=== $key ==="; rpm -q --queryformat '%{SUMMARY}\n' "$key"; rpm -q --queryformat '%{DESCRIPTION}' "$key" | gpg --show-keys --fingerprint; echo; done
+
+% package, arch
+
+# arch:search — search package (ERE supported)
+yay -Ss '<package>'
+
+# arch:provide — check what package provides this executables
+yay -Fy && yay -F '<executable>'
+
+# arch:info — get info about a package
+yay -Si '<package>'
+
+# arch:require — list dependencies of a package
+yay -Si '<package>'
+
+# arch:whatrequire — list reverse dependencies of a package
+yay -Sii '<package>'
+
+# arch:install — install packages
+yay -S '<package>'
+
+# arch:remove — remove a package using yay
+yay -Rs '<package>'
+
+# arch:remove:orphan — removing orphans and their configuration files (run this recursively until none)
+yay -Rns $(yay -Qtdq)
+
+# arch:ls — List all explicitly installed packages
+pacman -Qe
+
+# arch:ls:all — List all installed packages
+yay -Q
+
+# arch:ls:available — List all available packages
+yay -Sl
+
+# arch:update:all — yay upgrade all
+yay --sync --refresh --sysupgrade \
+  --nomakepkgconf \
+  --sudoloop \
+  --answerclean None \
+  --answerdiff None \
+  --answeredit None \
+  --answerupgrade None \
+  --noremovemake \
+  --norebuild \
+  --noredownload
+
+# arch:clean — remove all but 1 past version of cache of installed packages
+sudo pacman -Sc && paccache --remove --keep 1
+
+# arch:refresh:mirror — refresh pacman mirror list
+command -v rate-mirrors >/dev/null 2>&1 && bash -c 'rate-mirrors arch | sudo tee /etc/pacman.d/mirrorlist'
+
+# arch:refresh:update:all — refresh pacman mirror list and then upgrade
+navi --query "arch:refresh:mirror" --best-match && navi --query "arch:update:all" --best-match
+
+# arch:ls:local — List all foreign packages (typically manually downloaded and installed or packages removed from the repositories a.k.a. AUR)
+pacman -Qm
+
+# arch:ls:native — List all explicitly installed native packages (i.e. present in the sync database) that are not direct or optional dependencies
+pacman -Qent
+
+# arch:ls:native:all — List all native packages (installed from the sync database)
+pacman -Qn
+
+# arch:ls:all:date — List installed packages by date
+expac --timefmt='%Y-%m-%d %T' '%l\t%n' | sort
+
+% package, apt
+
+# apt:search — search for packages
+apt search <package>
+
+# apt:info — get info about a package
+apt show <package>
+
+# apt:install — install packages on ubuntu
+sudo apt -y install <package>
+
+# apt:remove — uninstall packages on ubuntu
+sudo apt -y autoremove <package>
+
+# apt:remove:orphan — Remove dependencies that are no longer needed (orphans), because e.g. the package which needed the dependencies was removed.
+sudo apt -y autoremove
+
+# apt:ls:all — list installed apt packages
+comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)
+
+# apt:update:all — update ubuntu. For the sudo-loop, see https://stackoverflow.com/a/30547074/5769446
+startsudo
+sudo apt -y update
+sudo apt -y upgrade
+stopsudo
+
+# apt:clean — remove all but 1 past version of cache of installed packages
+sudo apt -y clean
+
+% package, mas
+
+# mas:search — search for packages
+mas search <package_name>
+
+# mas:info — get info about a package
+mas info <package>
+
+# mas:install — install packages
+mas install <package>
+
+# mas:remove — uninstall packages
+mas uninstall <package>
+
+# mas:ls — list installed packages
+mas list
+
+# mas:update — update a package
+mas upgrade <package>
+
+# mas:update:all — update all packages
+mas upgrade
+
+% package, nix
+
+# nix:search — search for packages
+nix search nixpkgs '<package>'
+
+# nix:info — get info about a package
+nix eval --json 'nixpkgs#<package>.meta' | jq
+
+# nix:update:all — update nix
+startsudo
+if [[ $(uname) == Darwin ]]; then
+  cd ~/git/source/envoy
+  pixi run nix-update-all
+fi
+stopsudo
+
+# nix:clean — Clean nix cache. Hint: run devbox:clean before this.
+nix-collect-garbage -d && nix-store --optimise
+
+# nix:info:unstable — get info about a package in unstable channel
+nix eval --json 'github:NixOS/nixpkgs/nixpkgs-unstable#<package>.meta' | jq
+
+# nix:update:config — update nix flake config
+if [[ $(uname) == Darwin ]]; then
+  cd ~/git/source/envoy
+  pixi run nix-update-config
+fi
+
+# nix:check:PrimaryGroupID — check nix-darwin PrimaryGroupID
+dscl . -read /Groups/nixbld PrimaryGroupID
+
+% package, devbox
+
+# devbox:update:all — update devbox
+find ~/git -type d -name .devbox -exec bash -c 'env="${1%/*}"; echo "Updating at ${env}"; cd "${env}" && devbox update' bash {} \;
+
+# devbox:clean — run devbox garbage collection.
+find ~/git -type d -name .devbox -exec bash -c 'env="${1%/*}"; echo "Running gc at ${env}"; cd "${env}" && devbox run -- nix store gc --extra-experimental-features nix-command' bash {} \;
+
+% package, port
+
+# port:search — search for packages
+port search <package>
+
+# port:info — get info about a package
+port info <package>
+
+# port:require — list dependencies of a package
+port deps <package>
+
+# port:whatrequire — list reverse dependencies of a package
+port echo depends:<package>
+
+# port:install — install packages
+sudo port install <package>
+
+# port:remove — uninstall packages
+sudo port uninstall <package>
+
+# port:remove:orphan — remove orphan packages
+startsudo
+sudo port uninstall rleaves
+sudo port uninstall inactive
+stopsudo
+
+# port:ls — list installed packages
+port installed requested
+
+# port:ls:all — list all installed packages
+port installed
+
+# port:ls:available — list all available packages
+port list
+
+# port:update — update a package
+sudo port upgrade <package>
+
+# port:update:all — update macports. For the sudo-loop, see https://stackoverflow.com/a/30547074/5769446
+startsudo
+sudo port selfupdate
+sudo port upgrade outdated
+stopsudo
+
+# port:clean — cleanup macports. https://superuser.com/a/165670
+sudo port -f clean --all all; sudo port -f uninstall inactive
+
+# port:cutleaves — remove orphan packages interactively
+sudo port_cutleaves
+
+# port:check:x86_64 — list all macports package that's x86_64
+find /opt/local/bin -exec file {} + | grep -A 1 x86_64
+
+% package, brew
+
+# brew:search — search for packages
+brew search <package>
+
+# brew:info — get info about a package
+brew info <package>
+
+# brew:require — list dependencies of a package
+brew deps --tree <package>
+
+# brew:whatrequire — list reverse dependencies of a package
+brew uses --eval-all --recursive <package>
+
+# brew:install — install packages
+brew install <package>
+
+# brew:remove — uninstall packages
+brew uninstall <package>
+
+# brew:remove:orphan — remove orphan packages
+brew autoremove
+
+# brew:ls — list installed packages
+brew leaves
+
+# brew:ls:all — list all installed packages
+brew list
+
+# brew:ls:available — list all available packages
+brew search '*'
+
+# brew:ls:repo — list all enabled repos
+brew tap
+
+# brew:update — update a package
+brew upgrade <package>
+
+# brew:update:all — update all packages with a sudo loop. For the sudo-loop, see https://stackoverflow.com/a/30547074/5769446
+startsudo
+brew update
+brew upgrade
+stopsudo
+
+# brew:clean — clean cache
+brew cleanup --prune=all -s && rm -rf "$(brew --cache)"
+
+# brew:ls:cask — list all installed casks
+brew list --cask
+
+# brew:ls:version — list all installed packages with version
+brew ls --versions $(brew leaves)
+
+# brew:doctor — run brew doctor
+brew doctor
+
+% package, pip
+
+# pip:info — get info about a package. Note that it can only shows packages that are installed.
+python3 -m pip show <package>
+
+# pip:install — install packages
+python3 -m pip install <package>
+
+# pip:remove — uninstall packages
+python3 -m pip uninstall <package>
+
+# pip:ls — list installed packages
+python3 -m pip list --not-required
+
+# pip:ls:all — list installed packages
+python3 -m pip list
+
+# pip:update — update a package
+python3 -m pip install -U <package>
+
+# pip:update:all — update all packages
+python3 -m pip install -U -r <(pip freeze | cut -d = -f 1 | cut -d @ -f 1)
+
+# pip:clean — clean cache
+python3 -m pip cache purge
+
+# pip:editable — pip install current directory in editable mode
+python3 -m pip install -e . <args>
+
+$ args: echo -e " \n--no-dependencies"
+
+% package, conda
+
+# conda:search — search for packages
+mamba repoquery search <package>
+
+# conda:info — get info about a package
+mamba search <package> --info
+
+# conda:require — list dependencies of a package
+mamba repoquery depends --recursive --all-channels --tree <package>
+
+# conda:whatrequire — list reverse dependencies of a package
+mamba repoquery whoneeds --recursive --all-channels --tree <package>
+
+# conda:install — install packages
+mamba install <package>
+
+# conda:remove — uninstall packages
+mamba remove <package>
+
+# conda:remove:orphan — remove orphan packages. Note that this also update the environments, which is the only way to remove orphan packages. See https://github.com/conda/conda/issues/62#issuecomment-468982110
+mamba update --all
+
+# conda:ls — list installed packages
+mamba env export --from-history
+
+# conda:ls:all — list all installed packages
+mamba list
+
+# conda:ls:available — list all available packages
+mamba search
+
+# conda:ls:repo — list all enabled repos
+conda config --show channels
+
+# conda:update — update current conda environment
+mamba update <package>
+
+# conda:update:all — update current conda environment
+mamba update --all
+
+# conda:clean — conda cleanup all
+mamba clean --all -y; mamba build purge
+
+# conda:ls:env — list all conda environments
+mamba info --envs
+
+# conda:batch — running a certain command across all conda env.
+conda info --json | jq '.envs[]' | xargs -i -n1 -P1 bash -c '. activate {} && <command>'
+
+# conda:batch:env — running a certain command across all conda env. excluding base
+conda info --json | jq '.envs[]' | grep '/envs/' | xargs -i -n1 -P1 bash -c '. activate {} && <command>'
+
+# conda:batch:remove:orphan — batch remove orphan packages. Note that this also update the environments, which is the only way to remove orphan packages. See https://github.com/conda/conda/issues/62#issuecomment-468982110
+navi --query "conda:batch:env" --best-match 'mamba update --all'
+
+# conda:batch:update:all — update all conda environments
+navi --query "conda:batch" --best-match 'mamba update --all'
+
+% package, pixi
+
+# pixi:clean — clean pixi cache
+pixi clean cache
+
+# pixi:clean:all — find all pixi environments and clean it
+find ~/git -type d -name .pixi -exec bash -c 'env="${1%/*}"; echo "Cleaning at ${env}"; cd "${env}" && pixi clean' bash {} \;
+
+% package, jupyter
+
+# jupyter:install — install a jupyter lab extension
+jupyter labextension install <extension>
+
+# jupyter:remove — remove a jupyter lab extension
+jupyter labextension uninstall <extension>
+
+# jupyter:ls — list installed jupyter lab extensions
+jupyter labextension list
+
+# jupyter:update:all — update all packages
+jupyter labextension update --all
+
+# jupyter:ls:env — list jupyter kernels
+jupyter kernelspec list
+
+# jupyter:ipykernel:install — install a kernel for jupyter
+(
+  mamba activate '<name>' &&
+  python -m ipykernel install --user --name '<name>' --display-name '<name>'
+)
+
+% package, go
+
+# go:update:all — update all go packages
+go get -u all
+
+% package, vscode
+
+# code:install — install vscode extensions
+code --install-extension <extension>
+
+# code:remove — remove vscode extensions
+code --uninstall-extension <extension>
+
+# code:ls — list installed vscode extensions
+code --list-extensions

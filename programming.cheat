@@ -39,6 +39,12 @@ ipcluster start -n <processes> --engines=MPIEngineSetLauncher
 # ipy:ex — execute Jupyter Notebook
 jupyter-nbconvert --ExecutePreprocessor.timeout=-1 --execute <filename>
 
+# jupyter:start — start Jupyter in browser
+"/Applications/<chrome>.app/Contents/MacOS/<chrome>" -incognito --app=<address>
+
+$ chrome: echo -e "Chromium\nGoogle Chrome\nGoogle Chrome Canary"
+$ address: echo -e "https://192.168.4.5:8000\nhttps://192.168.4.7:8000\nhttps://192.168.4.8:8000\nhttps://172.22.2.7:8000"
+
 # jupyter:start:local — start Jupyter by running a local server
 conda activate jupyterlab && jupyter lab
 

@@ -43,6 +43,15 @@ sudo pkill -9 sshfs
 # sshfs:pgrep — show running sshfs processes.
 pgrep -lf sshfs
 
+% sshuttle, vpn
+
+# sshuttle — sshuttle as vpn. For clearing DNS cache, see https://github.com/sshuttle/sshuttle/issues/652
+sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder; sshuttle -r <server> <address> <exclude>
+
+$ server: echo -e "lpc\nkhcheung@bolowiki\nnobel"
+$ address: echo -e "0/0\n128.32.249.102"
+$ exclude: echo -e " \n-x 10.0.0.0/8 -x 172.16.0.0/12 -x 192.168.0.0/16"
+
 % ssh, keygen
 
 # ssh:remove:host_key — remove a host key, e.g. when you see the following message - Host key for <host> has changed and you have requested strict checking.

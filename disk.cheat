@@ -1,0 +1,41 @@
+% disk, usage
+
+# disk:du — du -h limited to a depth, sorted human-readable
+du -h -d <level> . | sort -h
+
+# disk:df — list mounted filesystems with type and human-readable sizes
+df -Th
+
+% disk, locate
+
+# disk:locate:create — create a personal locate database under ~/.locate.db
+slocate --database=~/.locate.db
+
+# disk:locate:update — refresh ~/.locate.db
+updatedb --require-visibility 0 -o ~/.locate.db
+
+% disk, hash
+
+# disk:md5sum — record md5 of every file under cwd into md5sum.txt
+find . <ignore_path> -type f \! -name 'md5sum.txt' -exec md5sum {} + | sort > md5sum.txt
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# disk:md5sum:verify — find every md5sum.txt and verify its directory
+find -name 'md5sum.txt' -exec bash -c 'cd ${0%/*}; md5sum -c md5sum.txt' {} \;
+
+% disk, benchmark
+
+# disk:write:test — write 1 GiB then 1000x512 B with O_DSYNC to measure sequential/sync write speed
+dd if=/dev/zero of=test1.img bs=1G count=1 oflag=dsync && dd if=/dev/zero of=test2.img bs=512 count=1000 oflag=dsync && rm test1.img test2.img
+
+% disk, hardware
+
+# disk:badblocks — scan a device for bad blocks (n = non-destructive read/write, w = destructive write)
+sudo badblocks -<destructive>vsb 4096 /dev/<disk>
+$ destructive: echo -e "n\nw"
+
+# disk:smart — full SMART report for a device
+sudo smartctl -x /dev/<disk>
+
+# disk:hdparm — identify info about a device
+sudo hdparm -I /dev/<disk>

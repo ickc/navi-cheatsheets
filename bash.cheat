@@ -1,26 +1,11 @@
 % bash, find
 
-# find:md5sum — save md5sum of all files into md5sum.txt
-find . <ignore_path> -type f \! -name 'md5sum.txt' -exec md5sum {} + | sort > md5sum.txt
-
-# find:check:md5sum — find all md5sum.txt and enter its directory to check all files
-find -name 'md5sum.txt' -exec bash -c 'cd ${0%/*}; md5sum -c md5sum.txt' {} \;
-
 # find:pandoc — find and run pandoc
 find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' {} \;
 
-% bash, disk
+% bash, csv
 
-# du — show sizes of everything up to a certain level using du.
-du -h -d <level> . | sort -h
-
-# create:locate_db — create locate.db
-slocate --database=~/.locate.db
-
-# update:locate_db — update locate.db
-updatedb --require-visibility 0 -o ~/.locate.db
-
-# sort:max — ignore header and show maximum. Assume file is something like a CSV with one row header and first column to be sorted.
+# sort:max — ignore header row and print the maximum (sorts numerically by first column)
 tail -n +2 <filename> | sort -n | tail -n1
 
 % bash, acl
@@ -45,14 +30,6 @@ $ perm_file: echo -e "640\n644"
 
 # permission:group:by:user — For those owned by $USER, change group recursively, add setgid & sticky bit for directories, and make group-readable recursively.
 find . -user "$USER" -exec chgrp -R <group> {} + && find . -user "$USER" -type d -exec chmod g+s {} + -exec chmod +t {} + && find . -user "$USER" -exec chmod g+r {} +
-
-% bash, filesystem
-
-# df — List file system mount points
-df -Th
-
-# write_test — perform write test at 1G/512. test1.img and test2.img will be written temporarily.
-dd if=/dev/zero of=test1.img bs=1G count=1 oflag=dsync && dd if=/dev/zero of=test2.img bs=512 count=1000 oflag=dsync && rm test1.img test2.img
 
 % bash, wget
 
@@ -80,17 +57,6 @@ sudo mount -t cifs -o username=${USER},uid=$(id -u),gid=$(id -g) //<server>/<nam
 
 # samba:reload — reload samba conf
 sudo smbcontrol all reload-config
-
-# badblocks — check badblocks of a device. n for non-destructive read/write, w for write
-sudo badblocks -<destructive>vsb 4096 /dev/<disk>
-
-$ destructive: echo -e "n\nw"
-
-# info:smart
-sudo smartctl -x /dev/<disk>
-
-# info:hdparm
-sudo hdparm -I /dev/<disk>
 
 # path:print — pretty-print PATH
 echo $<var> | tr ':' '\n'

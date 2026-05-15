@@ -8,29 +8,6 @@ find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' 
 # sort:max — ignore header row and print the maximum (sorts numerically by first column)
 tail -n +2 <filename> | sort -n | tail -n1
 
-% bash, acl
-
-# ls:group — List users in a group name
-lid -g <group>
-
-# chgrp — Change group and add sticky bit recursively
-chgrp -R <group_name> . && chmod -R g+s .
-
-# permission — recursively change ownership, add SetGID, etc.
-<sudo> chown -R <user> . && <sudo> chgrp -R <group> . && find . -type d -exec <sudo> chmod <perm_dir> {} + && find . -type f -exec <sudo> chmod <perm_file> {} +
-
-$ sudo: echo -e " \nsudo"
-$ user: echo -e "kolen\nkhcheung"
-$ group: echo -e "kolen\nkhcheung\npolar"
-$ perm_dir: echo -e "2750\n2755"
-$ perm_file: echo -e "640\n644"
-
-# permission:group — change group recursively, add setgid & sticky bit for directories, and make group-readable recursively.
-<sudo> chgrp -R <group> . && find . -type d -exec <sudo> chmod g+s {} + -exec <sudo> chmod +t {} + && chmod -R g+r .
-
-# permission:group:by:user — For those owned by $USER, change group recursively, add setgid & sticky bit for directories, and make group-readable recursively.
-find . -user "$USER" -exec chgrp -R <group> {} + && find . -user "$USER" -type d -exec chmod g+s {} + -exec chmod +t {} + && find . -user "$USER" -exec chmod g+r {} +
-
 % bash, wget
 
 # download:all — download all from the URL using wget

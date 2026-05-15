@@ -1,0 +1,11 @@
+% junkyard
+
+# Snippets in this file are on the way out: hardcoded personal paths,
+# obsolete tools, machine-specific defaults, trivial one-liners, or
+# duplicates that survived the refactor. Review and delete what you agree
+# with; promote anything you want to keep back into a real cheat file.
+
+% junkyard, zfs
+
+# zfs:video:link — symlink personal video collections from a specific pool into /Volumes (hardcoded to RAIDZ48TB layout)
+(cd /Volumes; sudo ln -s RAIDZ48TB/Videos .; sudo ln -s RAIDZ48TB/Videos-original .; sudo ln -s RAIDZ48TB/Videos-original-archive/ .)

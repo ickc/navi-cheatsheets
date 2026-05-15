@@ -78,3 +78,8 @@ cd "$HOME/Library/Mobile Documents/iCloud~com~apple~iBooks/Documents"
 
 # format:disk — `diskutil list` then partition a disk; mac:diskutil:ls + mac:diskutil:partition does the same in two steps
 diskutil list; diskutil partitionDisk '/dev/disk<N>' GPT JHFS+ '<name>' 100%
+
+% junkyard, linux
+
+# inotify — show fs.inotify before/after sysctl -p and restart dropbox; the dropbox service unit name is hardcoded to user "kolen"
+sysctl fs.inotify; sudo sysctl -p; sysctl fs.inotify; sudo systemctl restart dropbox@kolen.service && sudo systemctl restart system-dropbox.slice

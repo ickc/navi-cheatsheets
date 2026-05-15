@@ -1,80 +1,76 @@
 % programming, cleanup
 
-# fd:rm:ipycp — find and remove all .ipynb_checkpoints
+# cleanup:ipynb:checkpoints — recursively delete .ipynb_checkpoints directories
 find . -type d -name '.ipynb_checkpoints' -exec rm -rf {} +
 
-# fd:rm:py:aux — remove python's auxiliary files
+# cleanup:python — delete python's typical auxiliary artifacts (caches, coverage, eggs, mypy/pytest caches)
 find . \( -type f \( -name '*.py[co]' -o -name .dmypy.json -o -name .coverage -o -name coverage.xml -o -name coverage.lcov \) -o -type d \( -name htmlcov -o -name __pycache__ -o -name '*.egg-info' -o -name '*.eggs' -o -name .mypy_cache -o -name .pytest_cache -o -name .ipynb_checkpoints \) \) -exec rm -rf {} +
 
-# fd:rm:worker:cache — remove dask, parsl worker cache directories
+# cleanup:workers — remove dask and parsl worker-state directories
 find . -type d \( -name dask-worker-space -o -name runinfo \) -exec rm -rf {} +
 
-# fd:rm:tex:aux — remove LaTeX's auxiliary files
+# cleanup:latex — delete LaTeX's typical auxiliary files (.aux/.bbl/.bcf/.blg/.fdb_latexmk/.fls/.toc/.xdv)
 find . -type f \( -name '*.aux' -o -name '*.bbl' -o -name '*.bcf' -o -name '*.blg' -o -name '*.fdb_latexmk' -o -name '*.fls' -o -name '*.toc' -o -name '*.xdv' \) -delete
 
-# fd:rm:idea — remove .idea directories by Jetbrains
+# cleanup:idea — remove JetBrains .idea directories
 find . -type d -name .idea -exec rm -rf {} +
 
-# fd:rm:stack:cache — remove stack's cache
+# cleanup:haskell:stack — remove Haskell stack's lockfile and .stack-work
 find . \( -type f -name stack.yaml.lock -o -type d -name .stack-work \) -exec rm -rf {} +
 
-# fd:rm:node:cache — remove node's cache and vscode package (.vsix)
+# cleanup:node — remove node_modules, package-lock.json, and stray .vsix files
 find . \( -type f \( -name package-lock.json -o -name '*.vsix' \) -o -type d -name node_modules \) -exec rm -rf {} +
+
+# cleanup:repo — broad cleanup of project caches that are always safe to remove in a git repo
+find -type d \( -name __pycache__ -o -name .mypy_cache -o -name .tox -o -name .pytest_cache -o -name .ipynb_checkpoints -o -name '*.egg-info' -o -name .sass-cache \) -exec rm -rf {} +; find -type f \( -name '.coverage*' -o -name '*.pyc' \) -delete
 
 % programming, jupyter
 
-# fd:ipynb:clear — find all ipynb and clear output cells
+# jupyter:nbconvert:clear — clear output cells in every ipynb in-place
 find . \! -path '*/.ipynb_checkpoints/*' -name '*.ipynb' -exec jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {} +
 
-# fd:jupytext:format — format ipynb files
+# jupyter:nbconvert:execute — execute a single notebook with no timeout
+jupyter-nbconvert --ExecutePreprocessor.timeout=-1 --execute <filename>
+
+# jupyter:jupytext:format — run black + isort over every ipynb via jupytext, optionally syncing paired files
 find . \! -path '*/.ipynb_checkpoints/*' -name '*.ipynb' -exec jupytext <sync> --pipe black --pipe 'isort - --treat-comment-as-code "# %%" --float-to-top' {} +
 $ sync: echo -e " \n--sync"
 
-# jupyter:nb — start jupyter notebook
+# jupyter:notebook:start — start classic Jupyter Notebook on a fixed port
 jupyter notebook --no-browser --port=8989
 
-# ipcluster — start ipcluster
+# jupyter:lab:start — activate a conda env then start JupyterLab
+conda activate <env> && jupyter lab
+$ env: echo -e "jupyterlab"
+
+# jupyter:hub:start — activate a conda env then start a local JupyterHub from ~/.jupyter/jupyterhub_config.py
+conda activate <env> && jupyterhub -f=~/.jupyter/jupyterhub_config.py
+$ env: echo -e "jupyterlab"
+
+# ipython:cluster:start — start ipcluster with the MPI engine launcher and N processes
 ipcluster start -n <processes> --engines=MPIEngineSetLauncher
-
-# ipy:ex — execute Jupyter Notebook
-jupyter-nbconvert --ExecutePreprocessor.timeout=-1 --execute <filename>
-
-# jupyter:start — start Jupyter in browser
-"/Applications/<chrome>.app/Contents/MacOS/<chrome>" -incognito --app=<address>
-
-$ chrome: echo -e "Chromium\nGoogle Chrome\nGoogle Chrome Canary"
-$ address: echo -e "https://192.168.4.5:8000\nhttps://192.168.4.7:8000\nhttps://192.168.4.8:8000\nhttps://172.22.2.7:8000"
-
-# jupyter:start:local — start Jupyter by running a local server
-conda activate jupyterlab && jupyter lab
-
-# jupyter:start:hub — start Jupyter labhub
-conda activate jupyterlab && jupyterhub -f=~/.jupyter/jupyterhub_config.py
 
 % programming, python
 
-# format:ruff — format python files using ruff
-ruff check <path> --select F,I --fix --ignore F401 --extend-select F841 && ruff format <path>
-
-# mypy:stop — stop all mypy daemons
-(conda activate all310-conda-forge && find ~/git -name .dmypy.json -exec bash -c 'cd "${1%/*}" && dmypy stop' bash {} \;)
-
-# random:string — generate a random string
+# python:random:string — generate a random alphanumeric string of length N using SystemRandom
 python3 -c 'import random; import string; print("".join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(<N>)))'
-$ N: echo -e "44"
+$ N: echo -e "44\n32\n16"
 
 % programming, format
 
-# format:c — format C/C++ files with clang-format
+# format:python:ruff — fix imports/unused vars then format a path with ruff
+ruff check <path> --select F,I --fix --ignore F401 --extend-select F841 && ruff format <path>
+
+# format:c — clang-format every C/C++/CUDA/UPC source under cwd, WebKit style
 find . -type f \( -iname "*.c" -o -iname "*.cpp" -o -iname "*.h" -o -iname "*.cu" -o -iname "*.upc" \) -exec clang-format -i -style=WebKit {} \+
 
-# format:rust — format rust files
+# format:rust — rustfmt every *.rs under cwd
 find . -type f -name '*.rs' -exec rustfmt {} +
 
-# format:shell — format shell files
+# format:shell — normalize $var and [ ] usage with sed, then shfmt every *.sh
 find . -type f -name '*.sh' -exec sed -i -E -e 's/\$([a-zA-Z_][a-zA-Z0-9_]*|[0-9]+)/${\1}/g' -e 's/([^[])\[ ([^]]+) \]/\1[[ \2 ]]/g' {} + -exec shfmt --write --simplify --indent 4 --case-indent --space-redirects {} +
 
-# format:nix — format nix files
+# format:nix — nixfmt every *.nix under cwd
 find . -name '*.nix' -exec nixfmt {} +
 
 % programming, pandoc
@@ -82,10 +78,48 @@ find . -name '*.nix' -exec nixfmt {} +
 # pandoc:batch — batch-convert files matching a glob using pandoc, output named after the input with a new extension
 find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' {} \;
 
-# pandoc:rst — find all rst and build using pandoc
+# pandoc:rst — batch-convert every *.txt/*.rst to pandoc's default output format
 find \( -name '*.txt' -o -name '*.rst' \) -exec pandoc -s -f rst -o <filename> {} +
 
-% programming, misc
+# pandoc:markdown:cleanup — round-trip a markdown file through pandoc to normalize formatting
+pandoc -s -o '<filename>' '<filename>' -f markdown+abbreviations+autolink_bare_uris+markdown_attribute+mmd_header_identifiers+mmd_link_attributes+mmd_title_block+tex_math_double_backslash-latex_macros -t markdown+raw_tex-native_spans-simple_tables-multiline_tables-grid_tables-latex_macros -s --wrap=none --column=999 --atx-headers --reference-location=block --file-scope
 
-# list:dynamic:link — list dynamically linked libraries a program is using
+# pandoc:convert — pandoc to PDF via lualatex with sensible memoir defaults
+filename='<filename>'
+pandoc \
+  --toc \
+  --toc-depth=6 \
+  --pdf-engine=lualatex \
+  -M mainfont='TeX Gyre Schola' \
+  -M mathfont='TeX Gyre Schola Math' \
+  -M fontsize=10pt \
+  -M hyperrefoptions=bookmarksnumbered \
+  -M hyperrefoptions=pdfpagelabels \
+  -M hyperrefoptions=pagebackref \
+  -M hyperrefoptions='hypertexnames=false' \
+  -M hyperrefoptions='linktocpage=true' \
+  -M colorlinks \
+  -M linkcolor=blue \
+  -M filecolor=blue \
+  -M citecolor=blue \
+  -M urlcolor=blue \
+  -M toccolor=blue \
+  -M documentclass=memoir \
+  -M classoption=article \
+  -M geometry='inner=0.5in, outer=0.5in, top=0.5in, bottom=0.75in' \
+  --standalone \
+  --output="${filename%.*}.<ext>" \
+  "$filename"
+
+% programming, html
+
+# html:minify — minify HTML with the Go-based `minify` tool, in place
+minify --html-keep-document-tags --html-keep-end-tags --type=html -o <filename> <filename>
+
+% programming, system
+
+# sys:cacheline — print the CPU L1 d-cache line size in bytes (sysctl on macOS, getconf on Linux)
+if [[ "$(uname)" == Darwin ]]; then sysctl hw.cachelinesize; else getconf LEVEL1_DCACHE_LINESIZE; fi
+
+# sys:dynamic:link — list dynamically-linked libraries a binary depends on (otool on macOS, readelf on Linux)
 if [[ $(uname) == Darwin ]]; then otool -L <program>; else readelf --needed-libs <program>; fi

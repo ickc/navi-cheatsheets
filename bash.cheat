@@ -1,11 +1,5 @@
 % bash, find
 
-# find:level:sed — find files with a name pattern at a certain level and run inplace sed substitution on it.
-find . <ignore_path> -type f -maxdepth <level> -mindepth <level> -name "<name>" -exec sed -i 's/<from>/<to>/g' {} +
-
-# find:sed:linefeed — Convert carriage return (e.g. from Windows) to line feed
-find . <ignore_path> -type f -name '<name>' -exec sed -i -e 's/\r\n/\n/g' -e 's/\r/\n/g' {} +
-
 # find:md5sum — save md5sum of all files into md5sum.txt
 find . <ignore_path> -type f \! -name 'md5sum.txt' -exec md5sum {} + | sort > md5sum.txt
 

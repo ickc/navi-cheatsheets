@@ -1,137 +1,125 @@
 % git, log
 
-# git:log:author — show commit count per author
+# git:log:authors — count commits per author (shortlog)
 git shortlog -s
 
-# git:log:email — list all author name/email pairs
+# git:log:identities — list every (name, email) pair that has ever committed or authored
 git log --all --format='%aN <%cE>' | sort -u
 
 % git, diff
 
-# git:diff — show diff except deleted files
+# git:diff:branches — name-status diff between two branches, excluding deleted files
 git diff --name-status --diff-filter=d <tobranch>..<frombranch>
 
 % git, clone
 
-# git:clone — git clone from GitHub through ssh
+# git:clone:ssh — clone a GitHub repo over SSH
 git clone git@github.com:<user>/<repo>.git
 
 % git, remote
 
-# git:remote:add — add a remote
+# git:remote:add — add a remote URL under a name
 git remote add <remote> <URL>
 
 % git, submodule
 
-# git:submodule:update — update submodules recursively
+# git:submodule:update — recursive submodule update tracking remote heads
 git submodule update --init --recursive --remote
 
-# git:submodule:reset — reset the submodule status, useful when it is dirty
+# git:submodule:reset — discard local edits inside every submodule
 git submodule foreach --recursive git checkout .
 
 % git, reset
 
-# git:reset:remote — override local branch from remote
+# git:reset:remote — discard local branch state and reset to a remote tracking ref
 git fetch <remote> && git reset --hard <remote>/<branch>
 
-# git:reset:upstream — reset branch at origin from remote (e.g. origin is forked from an upstream remote)
+# git:reset:upstream — pull upstream's branch into origin, overwriting origin
 git fetch <remote> && git checkout <branch> && git reset --hard <remote>/<branch> && git push origin <branch> --force
-
 $ remote: echo -e "upstream"
-$ branch: echo -e "master"
-
-# git:reset:all — remove changes and untracked files
-git reset --hard && git clean -d -f
-
-# git:reset:from:remote — force pull from a branch from remote
-git reset --hard <remote>/<branch>
-
-$ remote: echo -e "origin"
 $ branch: echo -e "master\nmain"
+
+# git:reset:hard:branch — reset to a remote-tracking ref (no force-push)
+git reset --hard <remote>/<branch>
+$ remote: echo -e "origin"
+$ branch: echo -e "main\nmaster"
+
+# git:reset:hard:all — discard staged/unstaged edits and remove untracked files
+git reset --hard && git clean -d -f
 
 % git, merge
 
-# git:merge:upstream — merge from upstream
+# git:merge:upstream — fetch upstream and merge or rebase its branch into the current branch
 git fetch <remote> && git <strategy> <remote>/<branch>
-
 $ remote: echo -e "upstream"
 $ strategy: echo -e "rebase\nmerge"
-$ branch: echo -e "master"
+$ branch: echo -e "main\nmaster"
 
-# git:fastforward:upstream — fastforward to upstream's branch
+# git:merge:ff:upstream — fast-forward the local branch to upstream and push
 git fetch <remote> && git checkout <branch> && git merge --ff-only <remote>/<branch> && git push
-
 $ remote: echo -e "upstream"
-$ branch: echo -e "main"
+$ branch: echo -e "main\nmaster"
 
 % git, branch
 
-# git:rm:branch — remove a git branch both locally and remotely
+# git:branch:delete — delete a branch locally and on origin
 git branch -D <branch> && git push origin :<branch>
 
 % git, tag
 
-# git:rm:tag — remove a git tag both locally and remotely
+# git:tag:delete — delete a tag locally and on origin
 git tag -d <tag> && git push origin :<tag>
 
 % git, cherry-pick
 
-# git:cherrypick — git cherry-pick a range
+# git:cherrypick:range — cherry-pick a commit range, inclusive of the lower bound
 git cherry-pick '<from>^..<to>'
 
 % git, batch
 
-# git:batch:recursive — batch pull/push at all repositories recursively
+# git:batch:recursive — pull or push every git repo under cwd in parallel, retrying until success
 find . -type d -name '.git' -print0 | xargs -0 -n1 -P100 bash -c 'cd $0/.. && until git <action>; do echo retry git <action> $0 in 60s...; sleep 60; done'
-
 $ action: echo -e "pull\npush"
 
-# git:batch:level — batch pull/push at all repositories at a certain level
+# git:batch:level — pull or push every git repo at a specific depth, in parallel with retry
 level=$((<level> + 1)); find . -maxdepth $level -mindepth $level -type d -name '.git' -print0 | xargs -0 -n1 -P100 bash -c 'cd $0/.. && until git <action>; do echo retry git <action> $0 in 60s...; sleep 60; done'
-
 $ action: echo -e "pull\npush"
 
-# git:batch:level:debug — batch pull/push at all repositories at a certain level (serial, verbose)
+# git:batch:level:serial — same as git:batch:level but serial and verbose, for debugging
 level=$((<level> + 1)); find . -maxdepth $level -mindepth $level -type d -name '.git' -print0 | xargs -0 -n1 -P1 bash -c 'echo $0 && cd $0/.. && git <action>'
-
 $ action: echo -e "pull\npush"
 
-# git:reset:batch — batch reset at all repositories at a certain level
+# git:batch:reset — reset --hard + clean -df across every repo at a depth
 level=$((<level> + 1)); find . -maxdepth $level -mindepth $level -type d -name '.git' -print0 | xargs -0 -n1 -P0 bash -c 'cd $0/.. && git reset --hard && git clean -d -f'
 
-# git:stat — show number of git repos at a certain level
+# git:batch:count — count git repos grouped by their top-level parent directory at a depth
 level=$((<level> + 1)); find . -mindepth $level -mindepth $level -type d -name .git | sed -E 's/^\.\/([^/]+)\/.*$/\1/' | sort | uniq -c | sort -n
 
 % git, push
 
-# git:push:merge — git push then checkout then merge then push
+# git:push:merge — push <from>, then merge it into <to> and push (e.g. main -> gh-pages)
 git checkout <from> && git push && git checkout <to> && git merge --no-edit <from> && git push
-
-$ from: echo -e "master"
+$ from: echo -e "main\nmaster"
 $ to: echo -e "gh-pages"
 
-# git:force:push — force push to remote
+# git:push:force — force push the current branch
 git push -f
 
 % git, commit
 
-# git:undo — undo last commit while keeping change
-bash -c 'git reset HEAD^'
+# git:commit:undo — undo the last commit, keep working tree changes
+git reset HEAD^
 
-# git:commit:all — commit all staged and unstaged changes
+# git:commit:all — stage everything and open the commit editor
 git add -A && git commit
-
-% git, ssh
-
-# git:remove:domain — remove domain from known hosts, useful when their signature changed
-ssh-keygen -R <domain>
 
 % git, pull
 
-# git:force:pull — git pull while ignoring local changes
-git fetch --all && git reset --hard origin/master && git pull
+# git:pull:force — discard local changes and pull the latest from origin
+git fetch --all && git reset --hard origin/<branch> && git pull
+$ branch: echo -e "main\nmaster"
 
 % git, worktree
 
-# git:create:workingtree — create a new branch based on current branch and create working tree at ../<name>
+# git:worktree:create — create a new branch and a sibling worktree at ../<name>, then cd into it
 git worktree add -b '<name>' '../<name>' && cd '../<name>'

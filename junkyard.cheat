@@ -33,3 +33,8 @@ if [[ $(uname) == Darwin ]]; then
   cd ~/git/source/envoy
   pixi run nix-update-config
 fi
+
+% junkyard, git
+
+# git:remove:domain — remove a domain's host keys from ~/.ssh/known_hosts (duplicate of ssh:remove:host_key)
+ssh-keygen -R <domain>

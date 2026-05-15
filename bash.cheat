@@ -1,84 +1,5 @@
 % bash, find
 
-# find:extension — show counts of all extensions inside current directory, if no extension, show name instead. Ignore .git
-find . <ignore_path> -type f | sed -E 's/^.*([./][^./]+)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
-
-$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
-$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
-
-# find:long_extension — similar to fd:ext, but treat the first . as the beginning of ext e.g. .tar.gz. No extension is regarded as empty string
-find . <ignore_path> -type f | sed -E 's/^.*\/[^./]*([^/]*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
-
-# find:part:extension — similar to fd:ext, but ignoring .part
-find . <ignore_path> -type f | grep -o -E '[./][^./]+\.part$'<case_sensitivity>| sort | uniq -c | sort -n
-
-# find:name — find a name pattern, show counts of filenames. Ignore .git
-find . <ignore_path> -type f -name '<name>' | sed -E 's/^.*\/([^/]+)$/\1/g' | sort | uniq -c | sort -n
-
-# find:unread — find unreadable files
-find . \! -readable 2> /dev/null
-
-# find:git — find all git repositories recursively
-find . -name '.git' | sed -E 's/^(.*)\/[^/]*$/\1/g'
-
-# find:git:level — find all git repositories and do a statistics on how depth the levels are
-echo "count\tlevel"; find -name '.git' | awk -F/ '{print NF - 2}' | sort | uniq -c | sort -n
-
-# find:git:ignored:extension — find all git-ignored files and print a stat. on the extensions similar to fd:ext
-git status --porcelain=1 --ignored | grep -E "^\!\!" | sed -E 's/^.*([./][^./]+)[/]?$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
-
-# find:git:ignored:rm — find all git-ignored files and delete them. Note that it is not safe if the pathnames contain special characters
-git status --porcelain=1 --ignored | grep -E "^\!\!" | sed 's/^..//g' | xargs -i rm -rf "{}"
-
-# find:not:git:level — find directories at a level that is not a git repo
-find . -maxdepth <level> -mindepth <level> -type d -exec bash -c '[[ -d "$0/.git" ]] || echo $0' {} \;
-
-# find:dir — find a name pattern and show counts of the parent directories. Ignore .git
-find . <ignore_path> -type f -name '<name>' | sed -E 's/^(.*)\/[^/]*$/\1/g' | sort | uniq -c | sort -n
-
-# find:dir1 — find a name pattern, and show counts per 1st level sub-directory. Ignore .git
-find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2}' | sort | uniq -c | sort -n
-
-# find:dir2 — find a name pattern, and show counts per 2nd level sub-directory. Ignore .git
-find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2"/"$3}' | sort | uniq -c | sort -n
-
-# find:dir3 — find a name pattern, and show counts per 3rd level sub-directory. Ignore .git
-find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2"/"$3"/"$4}' | sort | uniq -c | sort -n
-
-# find:poor:name — find poor pathnames
-find . -exec bash -c 'for name do [[ "$name" =~ ^[a-zA-Z0-9./_-]*$ ]] || echo $name; done' bash {} +
-
-# find:executable — Find executables. Ignore .git
-find . <ignore_path> -type f -executable
-
-# find:empty — find empty files or directories. Ignore .git
-find . <ignore_path> -empty <options>
-
-$ options: echo -e " \n-delete"
-
-# find:conflict — find Dropbox's conflicted copy.
-find . \! -path '*/.dropbox.cache/*' -name '*conflicted copy*' <options>
-
-# find:ds_store — find mac's DS_Store files.
-find . \( -name '._.DS_Store' -o -name '.DS_Store' \) <options>
-
-# find:macos_hidden_files:rm — find mac's auto-created files on external drives and delete them.
-find . \( -name '.Trashes' -o -name '.fseventsd' -o -name '.Spotlight-V100' \) -exec sudo rm -rf {} +
-
-# find:ncol — find number of columns for files with given pattern.
-find . <ignore_path> -type f -name '<name>' -exec awk '{print NF}' {} + | sort -nu
-
-# find:cat:all — find files of a name pattern and cat all
-find . <ignore_path> -type f -name '<name>' -exec <cat_options> {} +
-
-$ cat_options: echo -e "cat\nless"
-
-# find:cat:dir — find files with extension in directories at a certain level and cat & sort together into a file with the same extension besides the directories.
-find . <ignore_path> -mindepth <level> -maxdepth <level> -type d -exec bash -c 'find $0 -name "*.<extension>" | xargs cat | sort > $0.<extension>' {} \;
-
-# find:cat:fzf — find files of a name pattern and cat all to fzf
-find . <ignore_path> -type f -name '<name>' -exec cat {} + | fzf
-
 # find:grep — find files of a name pattern and grep another pattern from them
 find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -HnE <args> '<pattern>' {} +
 
@@ -92,12 +13,6 @@ find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -h 'Maximum 
 
 # find:grep:time — assume <pattern> finds output of GNU time, get the row of time used, cut and sort by the time.
 find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -h 'Elapsed (wall clock) time' {} + | cut -d' ' -f 8 | sort -V
-
-# find:size — find files with a name pattern and print its size
-find . <ignore_path> -type f -name '<name>' -printf "%kKB %p\n" | sort -h
-
-# find:sort:modification_time — find files with a name pattern and sort by modification time. See https://superuser.com/a/546900/1211805
-find . <filter> -printf '%T@,%Tc\t%p\n' | sort -n | sed -E 's/^[^,]+,//'
 
 # find:level:sed — find files with a name pattern at a certain level and run inplace sed substitution on it.
 find . <ignore_path> -type f -maxdepth <level> -mindepth <level> -name "<name>" -exec sed -i 's/<from>/<to>/g' {} +
@@ -119,33 +34,6 @@ find . <ignore_path> -type f -name '*.<ext>' | XZ_OPT=-9 tar -cJf $(basename $(p
 
 # find:tar:xz:txt — find text files with a predefined name pattern and compress them as .txt.tar.xz with level e9
 find . <ignore_path> -type f -regextype posix-egrep -regex ".*/.*(-stdout_[[:digit:]]*|-stderr_[[:digit:]]*|makefile|.txt|.err|.csv|.out|.time|.in)" | XZ_OPT=-e9 tar -cJf $(basename $(pwd)).txt.tar.xz -T -
-
-# find:make:clean — find all makefiles in any sub-directories and run 'make clean'
-find . -type f \( -name GNUmakefile -o -name makefile -o -name Makefile \) -exec bash -c 'for makefile do cd "${makefile%/*}"; make -f "${makefile##*/}" clean; cd -; done' bash {} +
-
-# find:mv — mv files under current directory into directories named after its extensions
-find -maxdepth 1 -type f -exec bash -c 'dir="${0##*.}"; mkdir -p "$dir"; mv "$0" "$dir"' {} \;
-
-# find:open:image — find all images and open it. By default on macOS it will all be opened in one single Preview window.
-find . <ignore_path> -type f \( \
-  -iname '*.tiff' \
-  -o -iname '*.gif' \
-  -o -iname '*.png' \
-  -o -iname '*.jpeg' \
-  -o -iname '*.jpg' \
-  -o -iname '*.pdf' \
-\) -exec open {} +
-
-# find:mv:subdir — find all files in current directory and move them into a subdirectory with the same name without extension
-find . -mindepth 1 -maxdepth 1 -type f -exec bash -c '
-  for file do
-    dir="${file%.*}"
-    mkdir -p "$dir"
-    mv "$file" "$dir/$file"
-  done' bash {} +
-
-# find:symlink:broken — find broken symlink
-find . -xtype l
 
 # find:pandoc — find and run pandoc
 find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' {} \;

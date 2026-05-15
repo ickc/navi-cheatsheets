@@ -1,0 +1,59 @@
+% media, ffmpeg, video
+
+# ffmpeg:lut — apply a 3D LUT to a video and normalize loudness on the audio
+ffmpeg -i <input> -filter:v lut3d=<LUT> -filter:a loudnorm <output>
+
+# ffmpeg:probe:frames — show the nb_frames field on the video stream (may be empty for some containers)
+ffprobe -select_streams v -show_streams "<file>" 2> /dev/null | grep nb_frames
+
+# ffmpeg:extract:frame — extract a single frame at a timecode
+ffmpeg -ss <timecode> -i <input> -frames:v 1 <output>
+
+% media, ffmpeg, audio
+
+# ffmpeg:wav — transcode any container to 16 kHz mono s16le WAV (whisper-compatible)
+ffmpeg -i '<input>' -ar 16000 -ac 1 -c:a pcm_s16le '<output>.wav'
+
+# afconvert:wav — macOS equivalent: transcode any container to little-endian 16-bit WAV
+afconvert -f WAVE -d LEI16 '<input>' '<output>.wav'
+
+% media, mediainfo
+
+# mediainfo:frames — count frames via mediainfo's full scan
+mediainfo --fullscan "<file>" | grep "Frame count"
+
+% media, whisper
+
+# whisper:model:download — download a whisper.cpp ggml model into ~/.local/share/whisper-cpp
+(cd ~/.local/share/whisper-cpp; whisper-cpp-download-ggml-model <model>)
+$ model: echo -e "large-v3-turbo-q5_0\nlarge-v3\nmedium\nsmall\nbase\ntiny"
+
+# whisper:transcribe — whisper-cli over a wav, VTT output, tuned beam/entropy thresholds
+command time -v whisper-cli \
+  --threads $(nproc) \
+  --max-context 224 \
+  --best-of 5 \
+  --beam-size 5 \
+  --entropy-thold 3.2 \
+  --output-vtt \
+  --output-file '<output>' \
+  --print-progress \
+  --language <lang> \
+  <translate>  \
+  --model ~/.local/share/whisper-cpp/ggml-<model>.bin \
+  --file '<intermediate>.wav'
+$ lang: echo -e "en\nzh"
+$ translate: echo -e " \n--translate"
+$ model: echo -e "large-v3-turbo-q5_0\nlarge-v3\nmedium\nsmall\nbase\ntiny"
+
+% media, image
+
+# image:trim — strip surrounding whitespace from every image of a chosen extension (imagemagick)
+mogrify -trim *.<ext>
+$ ext: echo -e "png\njpg\nwebp\ntiff"
+
+% media, youtube
+
+# ytdlp:download — download a video with all available subtitles, retrying forever on failure
+until <ydl> --write-sub --all-subs "<url>" -o "<filename>.%(ext)s" -R infinite; do echo repeating...; done
+$ ydl: echo -e "yt-dlp\nyoutube-dl"

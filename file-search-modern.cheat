@@ -37,7 +37,7 @@ $ options: echo -e " \n--exec rm -rf"
 fd -t l -x sh -c '[ -e "$1" ] || echo "$1"' _ {}
 
 # fd:bad:names — find paths containing characters outside [a-zA-Z0-9./_-]
-fd '[^a-zA-Z0-9./_-]'
+fd -p '[^a-zA-Z0-9./_-]'
 
 % file-search-modern, fd, dir
 
@@ -82,11 +82,11 @@ fd -H 'conflicted copy' --exclude .dropbox.cache <options>
 $ options: echo -e " \n--exec rm -rf"
 
 # fd:macos:dsstore — find macOS .DS_Store metadata files; optionally delete
-fd -H -g '{.DS_Store,._.DS_Store}' <options>
+fd -H '\.DS_Store$' <options>
 $ options: echo -e " \n--exec rm -rf"
 
 # fd:macos:hidden:rm — recursively delete macOS auto-created junk on external drives
-fd -H -t d -g '{.Trashes,.fseventsd,.Spotlight-V100}' -x sudo rm -rf {}
+fd -H -t d '^\.(Trashes|fseventsd|Spotlight-V100)$' -x sudo rm -rf {}
 
 % file-search-modern, fd, stats
 
@@ -128,4 +128,4 @@ fd <include_hidden> -t f -e tiff -e gif -e png -e jpeg -e jpg -e pdf -X open
 $ include_hidden: echo -e " \n-H --no-ignore"
 
 # fd:make:clean — `make clean` in every directory containing a Makefile (any case)
-fd -t f -g '{GNUmakefile,makefile,Makefile}' -x bash -c 'cd "${0%/*}"; make -f "${0##*/}" clean' {}
+fd -t f '^(GNUmakefile|[Mm]akefile)$' -x bash -c 'cd "${0%/*}"; make -f "${0##*/}" clean' {}

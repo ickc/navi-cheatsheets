@@ -1,0 +1,16 @@
+% pdf, ghostscript
+
+# pdf:merge — concatenate every *.pdf in cwd into one file using Ghostscript
+gs -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sOutputFile="<output>" -f *.pdf
+
+# pdf:extract:pages — slice a page range out of a PDF using Ghostscript
+gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dFirstPage=<first> -dLastPage=<last> -sOutputFile='<output>' '<input>'
+
+% pdf, images
+
+# pdf:extract:images — pull every embedded image out of a PDF at native resolution
+mkdir -p "$(dirname '<output_prefix>')"; pdfimages -all -p '<input>' '<output_prefix>'
+
+# pdf:rasterize — render every PDF page to a PNG at a given DPI
+mkdir -p "$(dirname '<output_prefix>')"; pdftoppm -r <resolution> -png '<input>' '<output_prefix>'
+$ resolution: echo -e "150\n300\n72"

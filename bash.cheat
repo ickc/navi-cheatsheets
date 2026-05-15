@@ -8,14 +8,6 @@ find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' 
 # sort:max — ignore header row and print the maximum (sorts numerically by first column)
 tail -n +2 <filename> | sort -n | tail -n1
 
-% bash, gs
-
-# gs:merge — use ghostscript to merge PDFs
-gs -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sOutputFile="<output>" -f *.pdf
-
-# gs:extract — use ghostscript to extract page range from PDF
-gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dFirstPage=<first> -dLastPage=<last> -sOutputFile='<output>' '<input>'
-
 % bash, misc
 
 # pkill — kill all process of current user
@@ -31,14 +23,6 @@ echo $PATH | tr ':' '\n' | sort | uniq -c | sort -n
 
 # redirect — redirect stdout, stderr seperately while also print to terminal
 {{<command> <outfile>} > >(tee <outfile>.out)} 2> >(tee <outfile>.err)
-
-# extract:pdf:images — extract original images from PDF
-mkdir -p "$(dirname '<output_prefix>')"; pdfimages -all -p '<input>' '<output_prefix>'
-
-# pdf:to:images — convert each page of PDF to images using pdftoppm
-mkdir -p "$(dirname '<output_prefix>')"; pdftoppm -r <resolution> -png '<input>' '<output_prefix>'
-
-$ resolution: echo -e "150"
 
 # bit — show OS 64bit or 32bit
 getconf LONG_BIT

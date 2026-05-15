@@ -6,30 +6,8 @@ find . <ignore_path> -type f \! -name 'md5sum.txt' -exec md5sum {} + | sort > md
 # find:check:md5sum — find all md5sum.txt and enter its directory to check all files
 find -name 'md5sum.txt' -exec bash -c 'cd ${0%/*}; md5sum -c md5sum.txt' {} \;
 
-# find:tar:xz:extension — find files with a name pattern and compress them as .tar.xz with level 9
-find . <ignore_path> -type f -name '*.<ext>' | XZ_OPT=-9 tar -cJf $(basename $(pwd)).<ext>.tar.xz -T -
-
-# find:tar:xz:txt — find text files with a predefined name pattern and compress them as .txt.tar.xz with level e9
-find . <ignore_path> -type f -regextype posix-egrep -regex ".*/.*(-stdout_[[:digit:]]*|-stderr_[[:digit:]]*|makefile|.txt|.err|.csv|.out|.time|.in)" | XZ_OPT=-e9 tar -cJf $(basename $(pwd)).txt.tar.xz -T -
-
 # find:pandoc — find and run pandoc
 find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' {} \;
-
-% bash, tar
-
-# untar — untar a file, can be compressed, to a dir
-mkdir <dir>; tar -xf <filename> -C <dir>
-
-# tar:ls — list the content of a tar file, can be compressed
-tar -tf <filename>
-
-# tar:gz — tar and gzip a dir
-tar -czf <dirname>.tar.gz <dirname>
-
-# tar:xz — tar and xz a dir
-XZ_OPT=-<level> tar -cJf <dirname>.tar.xz <dirname>
-
-$ level: echo -e "e9"
 
 % bash, disk
 
@@ -83,12 +61,6 @@ wget -mke robots=off <URL>
 
 # download:level — download up to a certian level from the URL using wget
 wget -r -l <level> --no-remove-listing -ke robots=off <URL>
-
-# wget:untar
-wget -qO- '<URL>' | tar -xzf -
-
-# wget:unzip — wget and unzip a zip file, on macOS only.
-wget -qO- '<URL>' | bsdtar -xf-
 
 % bash, gs
 
@@ -205,9 +177,6 @@ find . -name '*.<ext>' -exec bash -c '
 ' bash {} +
 
 $ echo: echo -e "echo\n "
-
-# unzip:to:subdir — unzip to a subdir with the same stem of the zip file
-(file=<file>; unzip "$file" -d "${file%.*}")
 
 # obsidian:diff — diff of config files between 2 .obsidian directories
 for file in app.json appearance.json community-plugins.json core-plugins.json hotkeys.json; do difft <in_dir>/.obsidian/$file <out_dir>/.obsidian/$file; done

@@ -1,0 +1,35 @@
+% archive, tar
+
+# tar:untar — extract any tar (compression auto-detected) into a fresh directory
+mkdir <dir>; tar -xf <filename> -C <dir>
+
+# tar:ls — list contents of a (possibly compressed) tar archive
+tar -tf <filename>
+
+# tar:gz — gzip-compressed tarball of a directory
+tar -czf <dirname>.tar.gz <dirname>
+
+# tar:xz — xz-compressed tarball of a directory, configurable xz preset
+XZ_OPT=-<level> tar -cJf <dirname>.tar.xz <dirname>
+$ level: echo -e "e9\n9\n6"
+
+# tar:xz:ext — collect every file with a given extension into <cwd>.<ext>.tar.xz at level 9
+find . <ignore_path> -type f -name '*.<ext>' | XZ_OPT=-9 tar -cJf $(basename $(pwd)).<ext>.tar.xz -T -
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# tar:xz:logs — collect typical run-output text files (stdout/stderr/csv/err/out/time/in/makefile) into <cwd>.txt.tar.xz at preset e9
+find . <ignore_path> -type f -regextype posix-egrep -regex ".*/.*(-stdout_[[:digit:]]*|-stderr_[[:digit:]]*|makefile|.txt|.err|.csv|.out|.time|.in)" | XZ_OPT=-e9 tar -cJf $(basename $(pwd)).txt.tar.xz -T -
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+% archive, unzip
+
+# unzip:to:subdir — unzip an archive into a subdirectory named after its stem
+(file=<file>; unzip "$file" -d "${file%.*}")
+
+% archive, http
+
+# http:untar — download and stream-extract a gzipped tarball
+wget -qO- '<URL>' | tar -xzf -
+
+# http:unzip — download and stream-extract a zip (uses bsdtar; comes with macOS)
+wget -qO- '<URL>' | bsdtar -xf -

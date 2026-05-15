@@ -1,7 +1,7 @@
-% jekyll, serve
+% jekyll
 
-# serve — jekyll serve using bundle
+# jekyll:serve — bundle exec jekyll serve with drafts, profiling, and incremental rebuilds
 <ENV> bundle exec jekyll serve --profile --drafts --incremental
 
-; Environment Variable
+; prepend JEKYLL_ENV=production to render the site as it would deploy
 $ ENV: echo -e " \nJEKYLL_ENV=production"

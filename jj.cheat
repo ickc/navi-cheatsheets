@@ -1,0 +1,88 @@
+% jj, log
+
+# jj:log:authors — count revisions per author (shortlog-style)
+jj log --no-graph -T 'author.email() ++ "\n"' -r 'all()' | sort | uniq -c | sort -rn
+
+# jj:log:identities — list every (name, email) pair across all revisions
+jj log --no-graph -T 'author.name() ++ " <" ++ author.email() ++ ">\n"' -r 'all()' | sort -u
+
+% jj, diff
+
+# jj:diff:branches — name-status diff between two revsets, excluding deleted files
+jj diff --summary --from <tobranch> --to <frombranch> | grep -v '^D '
+
+% jj, clone
+
+# jj:clone:ssh — clone a GitHub repo over SSH into a jj-colocated working copy
+jj git clone --colocate git@github.com:<user>/<repo>.git
+
+% jj, remote
+
+# jj:remote:add — add a git remote (jj proxies to the colocated git repo)
+jj git remote add <remote> <URL>
+
+% jj, reset
+
+# jj:reset:remote — fast-forward a local bookmark to a remote-tracking ref, then check it out
+jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> && jj edit <branch>
+
+# jj:reset:upstream — move a local bookmark to upstream's head and force-push to origin
+jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> && jj git push --remote origin --bookmark <branch> --allow-backwards
+$ remote: echo -e "upstream"
+$ branch: echo -e "main\nmaster"
+
+# jj:reset:hard:branch — move a local bookmark to track a remote-tracking ref (no push)
+jj bookmark set <branch> -r <branch>@<remote>
+$ remote: echo -e "origin"
+$ branch: echo -e "main\nmaster"
+
+# jj:reset:hard:all — discard working-copy changes in the current revision
+jj restore
+
+% jj, merge
+
+# jj:merge:upstream — fetch upstream and create a new revision on top of upstream's branch (or rebase the current branch onto it)
+jj git fetch --remote <remote> && jj <strategy> -d <branch>@<remote>
+$ remote: echo -e "upstream"
+$ strategy: echo -e "rebase\nnew"
+$ branch: echo -e "main\nmaster"
+
+# jj:merge:ff:upstream — fast-forward the local bookmark to upstream and push to origin
+jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> && jj git push --remote origin --bookmark <branch>
+$ remote: echo -e "upstream"
+$ branch: echo -e "main\nmaster"
+
+% jj, branch
+
+# jj:branch:delete — delete a bookmark locally and on origin
+jj bookmark delete <branch> && jj git push --remote origin --bookmark <branch>
+
+% jj, cherry-pick
+
+# jj:cherrypick:range — duplicate a range of revisions onto the current revision
+jj duplicate '<from>..<to>' --destination @
+
+% jj, push
+
+# jj:push:force — push the current bookmark, allowing the remote to move backwards
+jj git push --bookmark <branch> --allow-backwards
+$ branch: echo -e "main\nmaster"
+
+% jj, commit
+
+# jj:commit:undo — undo the last jj operation (including a commit)
+jj undo
+
+# jj:commit:all — turn the current working copy into a new immutable revision
+jj commit
+
+% jj, pull
+
+# jj:pull:force — fetch and overwrite the local bookmark with the remote-tracking ref
+jj git fetch && jj bookmark set <branch> -r <branch>@origin && jj edit <branch>
+$ branch: echo -e "main\nmaster"
+
+% jj, worktree
+
+# jj:worktree:create — add a new jj workspace at ../<name> (separate working copy, shared op log)
+jj workspace add '../<name>' && cd '../<name>'

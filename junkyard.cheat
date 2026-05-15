@@ -67,3 +67,14 @@ dir="$(find -name _default.conf -exec dirname {} +)"; subdir="$(basename "$dir")
 
 # vtt:to:txt — call a personal vtt-to-text python script at ~/git/private/rewind-whisper/src/vtt2txt.py
 ~/git/private/rewind-whisper/src/vtt2txt.py '<file>.vtt' -o '<file>.txt'
+
+% junkyard, mac
+
+# default:open — call a personal default-open.sh at ~/git/source/bootstrapping-os-environments/macOS/
+~/git/source/bootstrapping-os-environments/macOS/default-open.sh
+
+# ibooks:path — cd into iBooks' PDF storage location (trivial; not worth a snippet)
+cd "$HOME/Library/Mobile Documents/iCloud~com~apple~iBooks/Documents"
+
+# format:disk — `diskutil list` then partition a disk; mac:diskutil:ls + mac:diskutil:partition does the same in two steps
+diskutil list; diskutil partitionDisk '/dev/disk<N>' GPT JHFS+ '<name>' 100%

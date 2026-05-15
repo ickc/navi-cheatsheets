@@ -1,90 +1,89 @@
-% mac
+% mac, kernel
 
-# kext — list loaded 3rd party kexts
+# mac:kext:ls — list non-Apple kernel extensions, sorted by name
 kextstat | grep -v com.apple | sort -bk 6
 
-# log:sleep — grep the log for wake reasons
+% mac, power
+
+# mac:log:sleep — show recent Wake/Sleep events with the reported reason
 pmset -g log | grep -iEe "(Wake|Sleep).*due to"
 
-# restart — restart macOS without asking for FileVault decryption again
+# mac:restart:filevault — restart macOS and skip the next FileVault prompt
 sudo fdesetup authrestart
 
-# default:show:hidden — show hidden files in macOS Finder
+% mac, finder
+
+# mac:finder:show:hidden — show dotfiles in Finder; relaunches Finder
 defaults write com.apple.Finder AppleShowAllFiles true && killall Finder
 
-# list:metadata — list all metadata of a file in macOS
+% mac, metadata
+
+# mac:mdls — list every Spotlight metadata attribute on a file
 mdls "<file>"
 
-# list:xattr — list all xattr of a file in macOS
+# mac:mdls:content:type — print just the kMDItemContentType (UTI) of a file
+mdls -name kMDItemContentType <file>
+
+# mac:xattr:ls — list extended attributes on a file
 xattr -l "<file>"
 
-# list:shared:by:me — list all iCloud files that is "Shared by Me"
+# mac:icloud:shared:by:me — list iCloud files in a directory that are "Shared by Me"
 mdfind -onlyin "<dir>" 'kMDItemIsShared == 1'
 $ dir: echo -e "$HOME/Library/Mobile Documents/"
 
-# check:default:content:type — check macOS file content type
-mdls -name kMDItemContentType <file>
+% mac, defaults
 
-# default:open — default opening plain-text by vscode
-~/git/source/bootstrapping-os-environments/macOS/default-open.sh
-
-# default:show — show default handlers for different UTIs and extensions
+# mac:default:handlers — read the LaunchServices secure plist to see UTI/extension handlers
 defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers
 
-# default:reload — rebuild Launch Services Database
+# mac:default:reload — rebuild the Launch Services database (call after editing UTI defaults)
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -kill -r -domain u -domain s -domain l -va
-
-# ibooks:path — go to iBooks PDF location
-cd "$HOME/Library/Mobile Documents/iCloud~com~apple~iBooks/Documents"
 
 % mac, spotlight
 
-# disable:indexing — disable indexing and searching for a drive
+# mac:spotlight:disable — turn off Spotlight indexing/search on a removable volume and clean its index dirs
 sudo mdutil -i off -d '/Volumes/<name>'; <sudo> touch '/Volumes/<name>/.metadata_never_index'; <sudo> rm -rf '/Volumes/<name>/.fseventsd' '/Volumes/<name>/.Spotlight-V100'
 $ sudo: echo -e " \nsudo"
 
-# delete:spotlight — delete all .Spotlight-V100 & .fseventsd recursively
+# mac:spotlight:rm — recursively remove .Spotlight-V100 and .fseventsd from cwd
 find \( -name .Spotlight-V100 -o -name .fseventsd \) -exec rm -rf {} +
 
-# prevent:spotlight — do not allow macOS to index current directory
+# mac:spotlight:prevent — prevent macOS indexing the current directory (drop .metadata_never_index)
 touch .metadata_never_index
 
-# prevent:dss — stop macOS from creating .DS_Store on network drives
+# mac:dsstore:prevent — stop macOS writing .DS_Store on network drives
 defaults write com.apple.desktopservices DSDontWriteNetworkStores true
 
-% mac, application
+% mac, apps
 
-# identify:dynamic:desktop — identify how many frames are in dynamic desktop
+# mac:apps:arch — count installed apps grouped by reported Kind (Intel/Apple Silicon/Universal/iOS)
+system_profiler SPApplicationsDataType | grep 'Kind: ' | sort | uniq -c | sort -n
+
+# mac:apps:arch:json — same as mac:apps:arch but via the json plist's arch_kind
+system_profiler -json SPApplicationsDataType | grep '"arch_kind"' | sort | uniq -c | sort -n
+
+# mac:apps:arch:xml — same as mac:apps:arch but via the xml plist's arch_kind key
+system_profiler -xml SPApplicationsDataType | grep -A 1 '<key>arch_kind</key>' | sort | uniq -c | sort -n
+
+# mac:heic:frames — tabulate frame counts and image sizes for every .heic (dynamic desktop) under cwd
 (export padlength=<padlength>; padlimit=$COLUMNS; pad=$(printf '%*s' "$padlimit"); export pad=${pad// /-}; find -iname '*.heic' -exec bash -c 'count=$(identify "$0" | wc -l); nameLength=$(echo "$0" | wc -L); printf "%s %*.*s %sx%s\n" "$0" 0 $((padlength - $nameLength - ${#count} )) "$pad" "$count" "$(exiftool -ImageSize "$0" | cut -d'"'"':'"'"' -f 2)"' {} \;)
 $ padlength: echo -e "60"
 
-# application:stat:plain — statistics of application arch-kind
-system_profiler SPApplicationsDataType | grep 'Kind: ' | sort | uniq -c | sort -n
-
-# application:stat:json — statistics of application arch-kind using json
-system_profiler -json SPApplicationsDataType | grep '"arch_kind"' | sort | uniq -c | sort -n
-
-# application:stat:xml — statistics of application arch-kind using xml
-system_profiler -xml SPApplicationsDataType | grep -A 1 '<key>arch_kind</key>' | sort | uniq -c | sort -n
-
 % mac, disk
 
-# diskutil:list — list all disks
+# mac:diskutil:ls — list every disk and partition
 diskutil list
 
-# diskutil:partition:disk — format disk
+# mac:diskutil:partition — wipe a disk and create one GPT partition spanning the whole device
 diskutil partitionDisk '/dev/disk<N>' GPT JHFS+ '<name>' 100%
 
-# format:disk — list disks then format
-diskutil list; diskutil partitionDisk '/dev/disk<N>' GPT JHFS+ '<name>' 100%
-
-# erase:fat — erase disk in FAT format
+# mac:diskutil:erase:fat — unmount then re-erase a disk as FAT32 with an MBR partition table
 diskutil unmountDisk /dev/disk<N>; diskutil eraseDisk FAT32 <name> MBRFormat /dev/disk<N>
 
-% mac, misc
+% mac, system
 
-# zerotier:restart — restart zerotier one on macOS
-sudo launchctl stop /Library/LaunchDaemons/com.zerotier.one.plist && sudo launchctl start /Library/LaunchDaemons/com.zerotier.one.plist
-
-# mac:clean — clean macOS caches
+# mac:caches:clean — wipe ~/Library/Caches and recreate the empty directory
 rm -rf ~/Library/Caches/; mkdir -p ~/Library/Caches/
+
+# mac:zerotier:restart — stop/start the ZeroTier One LaunchDaemon
+sudo launchctl stop /Library/LaunchDaemons/com.zerotier.one.plist && sudo launchctl start /Library/LaunchDaemons/com.zerotier.one.plist

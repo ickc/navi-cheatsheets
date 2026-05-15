@@ -53,9 +53,6 @@ conda activate jupyterlab && jupyterhub -f=~/.jupyter/jupyterhub_config.py
 
 % programming, python
 
-# fd:import — find all modules imported in .py files
-{ find . \! -path '*/.git/*' -type f -name '*.py' -exec grep --color=auto -ohP '^ *import \K[^ ]*' {} +; find . \! -path '*/.git/*' -type f -name '*.py' -exec grep --color=auto -ohP '^ *from \K[^ ]*(?= import)' {} +; } | sort -u
-
 # format:ruff — format python files using ruff
 ruff check <path> --select F,I --fix --ignore F401 --extend-select F841 && ruff format <path>
 

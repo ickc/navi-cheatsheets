@@ -1,0 +1,38 @@
+% text-search, grep
+
+# grep:recursive — case-insensitive recursive grep with line numbers
+grep --color=auto -irHn '<pattern>' .
+
+# grep:files — grep a pattern only inside files matching a name glob
+find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -HnE <args> '<pattern>' {} +
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+$ args: echo -e " \n-A 10"
+
+# grep:files:match — same as grep:files but show only the matched portion, sorted and unique
+find . <ignore_path> -type f -name '<name>' -exec grep -ho '<pattern>' {} + | sort -u
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# grep:gnu:time:mem — collect "Maximum resident set size" from GNU time logs and sort by KB
+find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -h 'Maximum resident set size' {} + | cut -d' ' -f 6 | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# grep:gnu:time:wall — collect "Elapsed (wall clock) time" from GNU time logs and sort version-style
+find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -h 'Elapsed (wall clock) time' {} + | cut -d' ' -f 8 | sort -V
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# grep:py:defs — count Python function definitions per name across all .py files
+find . <ignore_path> -type f -name '*.py' -exec grep -ohE 'def[ ]+([^(]+)\(' {} + | sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# grep:py:imports — list every module imported across all .py files
+{ find . <ignore_path> -type f -name '*.py' -exec grep --color=auto -ohP '^ *import \K[^ ]*' {} +; find . <ignore_path> -type f -name '*.py' -exec grep --color=auto -ohP '^ *from \K[^ ]*(?= import)' {} +; } | sort -u
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# grep:email — extract every email address from a file
+grep -EiEio '\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b' '<filename>'
+
+# grep:taskpaper — list unique TaskPaper-style tags in a file (e.g. @done)
+grep -o '@[^( ]\+' '<filename>' | sort -u
+
+# grep:unicode — show non-ASCII characters with line numbers
+grep --color=auto -P -n '[^\x00-\x7F]' '<filename>'

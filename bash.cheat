@@ -1,24 +1,7 @@
 % bash, find
 
-# find:grep — find files of a name pattern and grep another pattern from them
-find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -HnE <args> '<pattern>' {} +
-
-$ args: echo -e "-A 10\n "
-
-# find:grep:match — find files of a name pattern and grep another pattern from them, show match only, unique.
-find . <ignore_path> -type f -name '<name>' -exec grep -ho '<pattern>' {} + | sort -u
-
-# find:grep:time:ram — assume <pattern> finds output of GNU time, get the row of max. mem. used, cut and sort by the numbers.
-find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -h 'Maximum resident set size' {} + | cut -d' ' -f 6 | sort -n
-
-# find:grep:time — assume <pattern> finds output of GNU time, get the row of time used, cut and sort by the time.
-find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -h 'Elapsed (wall clock) time' {} + | cut -d' ' -f 8 | sort -V
-
 # find:level:sed — find files with a name pattern at a certain level and run inplace sed substitution on it.
 find . <ignore_path> -type f -maxdepth <level> -mindepth <level> -name "<name>" -exec sed -i 's/<from>/<to>/g' {} +
-
-# find:py:def — find all function definitions in *.py files and print the freq. per function name
-find . <ignore_path> -type f -name '*.py' -exec grep -ohE 'def[ ]+([^(]+)\(' {} + | sort | uniq -c | sort -n
 
 # find:sed:linefeed — Convert carriage return (e.g. from Windows) to line feed
 find . <ignore_path> -type f -name '<name>' -exec sed -i -e 's/\r\n/\n/g' -e 's/\r/\n/g' {} +
@@ -37,26 +20,6 @@ find . <ignore_path> -type f -regextype posix-egrep -regex ".*/.*(-stdout_[[:dig
 
 # find:pandoc — find and run pandoc
 find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' {} \;
-
-% bash, grep
-
-# grep — grep a pattern under current dir.
-grep --color=auto -irHn '<pattern>' .
-
-# grep:email — grep all email patterns from file
-grep -EiEio '\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b' '<filename>'
-
-# grep:taskpaper:tag — show all unique tags in TaskPaper format.
-; hint: filename is a taskpaper file
-grep -o '@[^( ]\+' '<filename>' | sort -u
-
-# grep:unicode — grep all unicode characters from file
-grep --color=auto -P -n '[^\x00-\x7F]' '<filename>'
-
-% bash, rg
-
-# rg:pattern
-rg '<pattern>' --iglob '<file>' --only-matching --no-filename --no-line-number
 
 % bash, tar
 

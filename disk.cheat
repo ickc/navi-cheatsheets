@@ -39,3 +39,11 @@ sudo smartctl -x /dev/<disk>
 
 # disk:hdparm — identify info about a device
 sudo hdparm -I /dev/<disk>
+
+% disk, flash
+
+# disk:f3:probe — destructively probe a flash drive to detect fake capacity
+f3probe --destructive --time-ops <disk>
+
+# disk:f3:io — full write-then-read cycle test on a mounted flash drive
+f3write <diskMount> && f3read <diskMount>

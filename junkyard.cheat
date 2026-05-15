@@ -59,3 +59,11 @@ $ address: echo -e "https://192.168.4.5:8000\nhttps://192.168.4.7:8000\nhttps://
 
 # clean:all — chains four navi --query lookups whose target snippet names changed during the refactor
 navi --query "find:ds_store" --best-match; navi --query "find:conflict" --best-match; navi --query "fd:rm:ipycp" --best-match; navi --query "fd:rm:py:aux" --best-match
+
+% junkyard, misc
+
+# gitit:serve — find a gitit `_default.conf` and serve the wiki (gitit's last release was 2017; effectively dead)
+dir="$(find -name _default.conf -exec dirname {} +)"; subdir="$(basename "$dir")"; cd "$dir/.." && gitit -f "$subdir/_default.conf"
+
+# vtt:to:txt — call a personal vtt-to-text python script at ~/git/private/rewind-whisper/src/vtt2txt.py
+~/git/private/rewind-whisper/src/vtt2txt.py '<file>.vtt' -o '<file>.txt'

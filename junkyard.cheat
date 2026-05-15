@@ -38,3 +38,11 @@ fi
 
 # git:remove:domain — remove a domain's host keys from ~/.ssh/known_hosts (duplicate of ssh:remove:host_key)
 ssh-keygen -R <domain>
+
+% junkyard, bash
+
+# texcount:md — texcount summary for markdown via texcount_processing from dautil-py (personal, unmaintained dependency)
+texcount_processing <(pandoc '<file>' -s -t latex | texcount -relaxed -)
+
+# clean:trash — clean ~/.local/share/Trash (one-liner, slightly dangerous, less safe than trash-cli)
+rm -rf ~/.local/share/Trash/

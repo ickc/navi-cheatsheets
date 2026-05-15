@@ -1,68 +1,46 @@
-% bash, find
+% bash, process
 
-# find:pandoc — find and run pandoc
-find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' {} \;
+# bash:pkill:user — kill every process owned by the current user
+pkill -u $USER
+
+% bash, path
+
+# bash:path:print — pretty-print a colon-separated env var (PATH, LD_LIBRARY_PATH, ...) one entry per line
+echo $<var> | tr ':' '\n'
+$ var: echo -e "PATH\nLD_LIBRARY_PATH\nMANPATH\nPYTHONPATH"
+
+# bash:path:stats — count duplicates in PATH (sorted ascending)
+echo $PATH | tr ':' '\n' | sort | uniq -c | sort -n
+
+# bash:dir:summary — count how many paths share a common parent at a depth (input: file of paths)
+cut -d/ -f-<level> <file> | sort | uniq -c | sort -n
+
+# bash:dir:summary:filter — like bash:dir:summary but restricted to paths under a parent
+grep '^<parent>/' <file> | cut -d/ -f-<level> | sort | uniq -c | sort -n
+
+% bash, shell
+
+# bash:redirect:tee — run a command, splitting stdout and stderr into separate tee'd log files
+{{<command> <outfile>} > >(tee <outfile>.out)} 2> >(tee <outfile>.err)
+
+# bash:bit — print whether the OS is 32 or 64 bit
+getconf LONG_BIT
+
+# bash:zcompdump:rebuild — drop ~/.zcompdump and rebuild zsh's completion cache
+rm -f ~/.zcompdump; compinit
 
 % bash, csv
 
-# sort:max — ignore header row and print the maximum (sorts numerically by first column)
+# csv:max — skip the header row and print the row with the largest first column (numeric)
 tail -n +2 <filename> | sort -n | tail -n1
 
-% bash, misc
+% bash, batch
 
-# pkill — kill all process of current user
-pkill -u $USER
-
-# path:print — pretty-print PATH
-echo $<var> | tr ':' '\n'
-
-$ var: echo -e "PATH\nLD_LIBRARY_PATH"
-
-# path:statistics — print stat of PATH, useful for inspecting duplicated paths
-echo $PATH | tr ':' '\n' | sort | uniq -c | sort -n
-
-# redirect — redirect stdout, stderr seperately while also print to terminal
-{{<command> <outfile>} > >(tee <outfile>.out)} 2> >(tee <outfile>.err)
-
-# bit — show OS 64bit or 32bit
-getconf LONG_BIT
-
-# zcompdump:rebuild — rebuild .zcompdump after installing new zsh completions
-rm -f ~/.zcompdump; compinit
-
-# texcount:md — texcount summary info on markdown files using texcount_processing from dautil-py
-texcount_processing <(pandoc '<file>' -s -t latex | texcount -relaxed -)
-
-# directory:summary — In a file with multiple lines of paths, count the occurence of parents at certain level.
-cut -d/ -f-<level> <file> | sort | uniq -c | sort -n
-
-# directory:grep:summary — similar to directory summary, but filtered by a grep-ing a parent directory first.
-grep '^<parent>/' <file> | cut -d/ -f-<level> | sort | uniq -c | sort -n
-
-# batch:convert — batch running a filter command from one file to another with a different parent and extension. Hint—cd into the directory containing the files first!
+# bash:batch:convert — apply a filter from every *.<ext> in cwd to ../<parent>/*.<out_ext>, optionally dry-run
 mkdir -p '../<parent>'; \
 find . -name '*.<ext>' -exec bash -c '
   for file do
   <echo> <command> <flags_before> "$file" <flags_after> > "../<parent>/${file%.<ext>}.<out_ext>"
   done
 ' bash {} +
-
-$ echo: echo -e "echo\n "
-
-# obsidian:diff — diff of config files between 2 .obsidian directories
-for file in app.json appearance.json community-plugins.json core-plugins.json hotkeys.json; do difft <in_dir>/.obsidian/$file <out_dir>/.obsidian/$file; done
-
-# obsidian:sort:json — sort json config file in .obsidian directory
-for file in app.json appearance.json hotkeys.json; do \
-  jq '.' -S < <in_dir>/.obsidian/$file > <in_dir>/.obsidian/$file.out; \
-  mv -f <in_dir>/.obsidian/$file.out <in_dir>/.obsidian/$file; \
-done; \
-for file in community-plugins.json core-plugins.json; do \
-  jq 'sort' < <in_dir>/.obsidian/$file > <in_dir>/.obsidian/$file.out; \
-  mv -f <in_dir>/.obsidian/$file.out <in_dir>/.obsidian/$file; \
-done
-
-$ in_dir: echo -e "."
-
-# clean:trash — clean trash
-rm -rf ~/.local/share/Trash/
+$ echo: echo -e " \necho"

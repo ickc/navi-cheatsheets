@@ -79,6 +79,9 @@ find . -name '*.nix' -exec nixfmt {} +
 
 % programming, pandoc
 
+# pandoc:batch — batch-convert files matching a glob using pandoc, output named after the input with a new extension
+find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' {} \;
+
 # pandoc:rst — find all rst and build using pandoc
 find \( -name '*.txt' -o -name '*.rst' \) -exec pandoc -s -f rst -o <filename> {} +
 

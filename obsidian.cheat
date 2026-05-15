@@ -1,0 +1,15 @@
+% obsidian, config
+
+# obsidian:config:diff — difftastic-diff the well-known config files between two .obsidian directories
+for file in app.json appearance.json community-plugins.json core-plugins.json hotkeys.json; do difft <in_dir>/.obsidian/$file <out_dir>/.obsidian/$file; done
+
+# obsidian:config:sort — canonicalize the well-known .obsidian config files (sort objects/arrays) so diffs are stable
+for file in app.json appearance.json hotkeys.json; do \
+  jq '.' -S < <in_dir>/.obsidian/$file > <in_dir>/.obsidian/$file.out; \
+  mv -f <in_dir>/.obsidian/$file.out <in_dir>/.obsidian/$file; \
+done; \
+for file in community-plugins.json core-plugins.json; do \
+  jq 'sort' < <in_dir>/.obsidian/$file > <in_dir>/.obsidian/$file.out; \
+  mv -f <in_dir>/.obsidian/$file.out <in_dir>/.obsidian/$file; \
+done
+$ in_dir: echo -e "."

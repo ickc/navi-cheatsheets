@@ -1,0 +1,131 @@
+% file-search-modern, fd, extension
+
+# fd:ext — count files grouped by extension; for extensionless files use the filename
+fd <include_hidden> -t f | sd '^.*([./][^./]+)$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
+$ include_hidden: echo -e " \n-H --no-ignore"
+$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
+
+# fd:ext:full — like fd:ext but treat the first . as the start of the extension (so .tar.gz counts whole)
+fd <include_hidden> -t f | sd '^.*/[^./]*([^/]*)$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
+$ include_hidden: echo -e " \n-H --no-ignore"
+$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
+
+# fd:ext:part — count extensions among files ending in .part
+fd <include_hidden> -t f -e part --format '{/}' | rg -o '[./][^./]+\.part$'<case_sensitivity>| sort | uniq -c | sort -n
+$ include_hidden: echo -e " \n-H --no-ignore"
+$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
+
+% file-search-modern, fd, name
+
+# fd:name — count files matching a glob, by filename
+fd <include_hidden> -t f -g '<name>' --format '{/}' | sort | uniq -c | sort -n
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:unreadable — find files the current user can't read
+fd -t f -x sh -c '[ -r "$1" ] || echo "$1"' _ {} 2>/dev/null
+
+# fd:executable — find executable files
+fd <include_hidden> -t x
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:empty — find empty files or directories; optionally delete them
+fd <include_hidden> -t e <options>
+$ include_hidden: echo -e " \n-H --no-ignore"
+$ options: echo -e " \n--exec rm -rf"
+
+# fd:symlink:broken — find broken symlinks
+fd -t l -x sh -c '[ -e "$1" ] || echo "$1"' _ {}
+
+# fd:bad:names — find paths containing characters outside [a-zA-Z0-9./_-]
+fd '[^a-zA-Z0-9./_-]'
+
+% file-search-modern, fd, dir
+
+# fd:dir — count parent directories of files matching a name
+fd <include_hidden> -t f -g '<name>' --format '{//}' | sort | uniq -c | sort -n
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:dir:1 — count files matching a name, grouped by 1st-level subdirectory
+fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $2}' | sort | uniq -c | sort -n
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:dir:2 — count files matching a name, grouped by 2nd-level subdirectory
+fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $2"/"$3}' | sort | uniq -c | sort -n
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:dir:3 — count files matching a name, grouped by 3rd-level subdirectory
+fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $2"/"$3"/"$4}' | sort | uniq -c | sort -n
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+% file-search-modern, fd, repo
+
+# fd:repos — list every .git directory's parent (i.e. every git repo)
+fd -H --no-ignore -t d '^\.git$' --format '{//}'
+
+# fd:repos:depth — count git repos by depth from cwd
+echo "count\tlevel"; fd -H --no-ignore -t d '^\.git$' | awk -F/ '{print NF - 2}' | sort | uniq -c | sort -n
+
+# fd:not:repo:level — directories at a specific depth that aren't git repos
+fd --exact-depth <level> -t d -x sh -c '[ -d "$1/.git" ] || echo "$1"' _ {}
+
+# fd:gitignored:ext — count extensions among git-ignored files
+git status --porcelain=1 --ignored | rg '^\!\!' | sd '^.*([./][^./]+)[/]?$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
+$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
+
+# fd:gitignored:rm — delete every git-ignored file (unsafe with special characters)
+git status --porcelain=1 --ignored | rg '^\!\!' | sd '^..' '' | xargs -I{} rm -rf "{}"
+
+% file-search-modern, fd, macos
+
+# fd:dropbox:conflict — find Dropbox's "conflicted copy" files; optionally delete
+fd -H 'conflicted copy' --exclude .dropbox.cache <options>
+$ options: echo -e " \n--exec rm -rf"
+
+# fd:macos:dsstore — find macOS .DS_Store metadata files; optionally delete
+fd -H -g '{.DS_Store,._.DS_Store}' <options>
+$ options: echo -e " \n--exec rm -rf"
+
+# fd:macos:hidden:rm — recursively delete macOS auto-created junk on external drives
+fd -H -t d -g '{.Trashes,.fseventsd,.Spotlight-V100}' -x sudo rm -rf {}
+
+% file-search-modern, fd, stats
+
+# fd:ncol — distinct column counts (awk NF) across files matching a name
+fd <include_hidden> -t f -g '<name>' -X awk '{print NF}' | sort -nu
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:size — print sizes of files matching a name, sorted ascending
+fd <include_hidden> -t f -g '<name>' -x stat --printf='%sB %n\n' {} | sort -h
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:sort:mtime — sort matched files by modification time (oldest first)
+fd <include_hidden> -t f <filter> -x stat --printf '%Y\t%y\t%n\n' {} | sort -n | cut -f2-
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+% file-search-modern, fd, action
+
+# fd:cat — cat (or bat) the concatenation of files matching a name
+fd <include_hidden> -t f -g '<name>' -X <viewer>
+$ include_hidden: echo -e " \n-H --no-ignore"
+$ viewer: echo -e "cat\nbat"
+
+# fd:cat:dir — for each directory at a depth, cat+sort its files of a given extension into a sibling file
+fd <include_hidden> --exact-depth <level> -t d -x bash -c 'fd -t f -e <extension> . "$0" -X cat | sort > "$0.<extension>"' {}
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:cat:fzf — cat all matching files into fzf for interactive browsing
+fd <include_hidden> -t f -g '<name>' -X cat | fzf
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:mv:by:ext — move every file in cwd into a subdirectory named after its extension
+fd --max-depth 1 -t f -x bash -c 'dir="${0##*.}"; mkdir -p "$dir"; mv "$0" "$dir"' {}
+
+# fd:mv:by:basename — move every file in cwd into a subdirectory with the same name (minus extension)
+fd --max-depth 1 -t f -x bash -c 'dir="${0%.*}"; mkdir -p "$dir"; mv "$0" "$dir/$0"' {}
+
+# fd:image:open — open all images (tiff/gif/png/jpg/jpeg/pdf) found below cwd (macOS opens them all in Preview)
+fd <include_hidden> -t f -e tiff -e gif -e png -e jpeg -e jpg -e pdf -X open
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# fd:make:clean — `make clean` in every directory containing a Makefile (any case)
+fd -t f -g '{GNUmakefile,makefile,Makefile}' -x bash -c 'cd "${0%/*}"; make -f "${0##*/}" clean' {}

@@ -1,0 +1,32 @@
+% text-search-modern, rg
+
+# rg:recursive — recursive search with line numbers and filenames
+rg -i '<pattern>'
+
+# rg:files — grep a pattern only inside files matching a glob
+rg <args> -g '<name>' '<pattern>'
+$ args: echo -e " \n-A 10"
+
+# rg:files:match — same as rg:files but show only the matched portion, sorted and unique
+rg -oN --no-filename -g '<name>' '<pattern>' | sort -u
+
+# rg:gnu:time:mem — collect "Maximum resident set size" from GNU time logs and sort by KB
+rg -N --no-filename -g '<name>' 'Maximum resident set size' | cut -d' ' -f 6 | sort -n
+
+# rg:gnu:time:wall — collect "Elapsed (wall clock) time" from GNU time logs and sort version-style
+rg -N --no-filename -g '<name>' 'Elapsed \(wall clock\) time' | cut -d' ' -f 8 | sort -V
+
+# rg:py:defs — count Python function definitions per name across all .py files
+rg -t py -oN --no-filename -r '$1' 'def[ ]+([^(]+)\(' | sort | uniq -c | sort -n
+
+# rg:py:imports — list every module imported across all .py files
+{ rg -t py -oNP --no-filename '^ *import \K\S+'; rg -t py -oNP --no-filename '^ *from \K\S+(?= import)'; } | sort -u
+
+# rg:email — extract every email address from a file
+rg -oN --no-filename -i '\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b' '<filename>'
+
+# rg:taskpaper — list unique TaskPaper-style tags in a file (e.g. @done)
+rg -oN --no-filename '@[^( ]+' '<filename>' | sort -u
+
+# rg:unicode — show non-ASCII characters with line numbers
+rg -nP '[^\x00-\x7F]' '<filename>'

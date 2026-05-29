@@ -46,15 +46,15 @@ fd <include_hidden> -t f -g '<name>' --format '{//}' | sort | uniq -c | sort -n
 $ include_hidden: echo -e " \n-H --no-ignore"
 
 # fd:dir:1 — count files matching a name, grouped by 1st-level subdirectory
-fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $2}' | sort | uniq -c | sort -n
+fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $1}' | sort | uniq -c | sort -n
 $ include_hidden: echo -e " \n-H --no-ignore"
 
 # fd:dir:2 — count files matching a name, grouped by 2nd-level subdirectory
-fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $2"/"$3}' | sort | uniq -c | sort -n
+fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $1"/"$2}' | sort | uniq -c | sort -n
 $ include_hidden: echo -e " \n-H --no-ignore"
 
 # fd:dir:3 — count files matching a name, grouped by 3rd-level subdirectory
-fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $2"/"$3"/"$4}' | sort | uniq -c | sort -n
+fd <include_hidden> -t f -g '<name>' | awk -F '/' '{print $1"/"$2"/"$3}' | sort | uniq -c | sort -n
 $ include_hidden: echo -e " \n-H --no-ignore"
 
 % file-search-modern, fd, repo

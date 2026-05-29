@@ -93,7 +93,7 @@ $ action: echo -e "pull\npush"
 level=$((<level> + 1)); find . -maxdepth $level -mindepth $level -type d -name '.git' -print0 | xargs -0 -n1 -P0 bash -c 'cd $0/.. && git reset --hard && git clean -d -f'
 
 # git:batch:count — count git repos grouped by their top-level parent directory at a depth
-level=$((<level> + 1)); find . -mindepth $level -mindepth $level -type d -name .git | sed -E 's/^\.\/([^/]+)\/.*$/\1/' | sort | uniq -c | sort -n
+level=$((<level> + 1)); find . -maxdepth $level -mindepth $level -type d -name .git | sed -E 's/^\.\/([^/]+)\/.*$/\1/' | sort | uniq -c | sort -n
 
 % git, push
 

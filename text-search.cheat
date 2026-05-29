@@ -29,7 +29,7 @@ $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 
 # grep:email — extract every email address from a file
-grep -EiEio '\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b' '<filename>'
+grep -Eio '\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b' '<filename>'
 
 # grep:taskpaper — list unique TaskPaper-style tags in a file (e.g. @done)
 grep -o '@[^( ]\+' '<filename>' | sort -u

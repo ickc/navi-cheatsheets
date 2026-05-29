@@ -23,8 +23,8 @@ jj git remote add <remote> <URL>
 
 % jj, reset
 
-# jj:reset:remote — fast-forward a local bookmark to a remote-tracking ref, then check it out
-jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> && jj edit <branch>
+# jj:reset:remote — reset a local bookmark to a remote-tracking ref (even backwards), then check it out
+jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> --allow-backwards && jj edit <branch>
 
 # jj:reset:upstream — move a local bookmark to upstream's head and force-push to origin
 jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> --allow-backwards && jj git push --remote origin --bookmark <branch>
@@ -32,7 +32,7 @@ $ remote: echo -e "upstream"
 $ branch: echo -e "main\nmaster"
 
 # jj:reset:hard:branch — move a local bookmark to track a remote-tracking ref (no push)
-jj bookmark set <branch> -r <branch>@<remote>
+jj bookmark set <branch> -r <branch>@<remote> --allow-backwards
 $ remote: echo -e "origin"
 $ branch: echo -e "main\nmaster"
 
@@ -79,7 +79,7 @@ jj commit
 % jj, pull
 
 # jj:pull:force — fetch and overwrite the local bookmark with the remote-tracking ref
-jj git fetch && jj bookmark set <branch> -r <branch>@origin && jj edit <branch>
+jj git fetch && jj bookmark set <branch> -r <branch>@origin --allow-backwards && jj edit <branch>
 $ branch: echo -e "main\nmaster"
 
 % jj, worktree

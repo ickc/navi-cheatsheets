@@ -429,10 +429,10 @@ conda info --json | jq '.envs[]' | xargs -i -n1 -P1 bash -c '. activate {} && <c
 conda info --json | jq '.envs[]' | grep '/envs/' | xargs -i -n1 -P1 bash -c '. activate {} && <command>'
 
 # conda:batch:remove:orphan — orphan-clean across every non-base env (see conda/conda#62)
-navi --query "conda:batch:env" --best-match 'mamba update --all'
+command='mamba update --all' navi --query "conda:batch:env" --best-match
 
 # conda:batch:update:all — update every package across every conda env
-navi --query "conda:batch" --best-match 'mamba update --all'
+command='mamba update --all' navi --query "conda:batch" --best-match
 
 % package, pixi
 

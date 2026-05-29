@@ -5,11 +5,8 @@ Personal [navi](https://github.com/denisidoro/navi) cheatsheets.
 ## Installation
 
 ```bash
-# Add as a custom cheatsheet path
-export NAVI_PATH="/path/to/navi-cheatsheets"
-
-# Or symlink into navi's default location
-ln -s /path/to/navi-cheatsheets ~/.local/share/navi/cheats/personal
+mkdir -p ~/.local/share/navi
+git clone git@github.com:ickc/navi-cheatsheets.git ~/.local/share/navi/cheats
 ```
 
 ## Layout

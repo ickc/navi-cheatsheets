@@ -95,7 +95,7 @@ fd <include_hidden> -t f -g '<name>' -X awk '{print NF}' | sort -nu
 $ include_hidden: echo -e " \n-H --no-ignore"
 
 # fd:size — print sizes of files matching a name, sorted ascending
-fd <include_hidden> -t f -g '<name>' -x stat --printf='%sB %n\n' {} | sort -h
+fd <include_hidden> -t f -g '<name>' -x du -sh {} | sort -h
 $ include_hidden: echo -e " \n-H --no-ignore"
 
 # fd:sort:mtime — sort matched files by modification time (oldest first)

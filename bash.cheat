@@ -43,4 +43,4 @@ find . -name '*.<ext>' -exec bash -c '
   <echo> <command> <flags_before> "$file" <flags_after> > "../<parent>/${file%.<ext>}.<out_ext>"
   done
 ' bash {} +
-$ echo: echo -e " \necho"
+$ echo: echo -e "echo\n "

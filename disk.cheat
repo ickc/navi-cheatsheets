@@ -8,8 +8,8 @@ df -Th
 
 % disk, locate
 
-# disk:locate:create — create a personal locate database under ~/.locate.db
-slocate --database=~/.locate.db
+# disk:locate:search — search a personal locate database
+locate --database=~/.locate.db '<pattern>'
 
 # disk:locate:update — refresh ~/.locate.db
 updatedb --require-visibility 0 -o ~/.locate.db

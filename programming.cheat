@@ -22,7 +22,7 @@ find . \( -type f -name stack.yaml.lock -o -type d -name .stack-work \) -exec rm
 find . \( -type f \( -name package-lock.json -o -name '*.vsix' \) -o -type d -name node_modules \) -exec rm -rf {} +
 
 # cleanup:repo — broad cleanup of project caches that are always safe to remove in a git repo
-find -type d \( -name __pycache__ -o -name .mypy_cache -o -name .tox -o -name .pytest_cache -o -name .ipynb_checkpoints -o -name '*.egg-info' -o -name .sass-cache \) -exec rm -rf {} +; find -type f \( -name '.coverage*' -o -name '*.pyc' \) -delete
+find . -type d \( -name __pycache__ -o -name .mypy_cache -o -name .tox -o -name .pytest_cache -o -name .ipynb_checkpoints -o -name '*.egg-info' -o -name .sass-cache \) -exec rm -rf {} +; find . -type f \( -name '.coverage*' -o -name '*.pyc' \) -delete
 
 % programming, jupyter
 

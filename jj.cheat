@@ -59,8 +59,8 @@ jj bookmark delete <branch> && jj git push --remote origin --bookmark <branch>
 
 % jj, cherry-pick
 
-# jj:cherrypick:range — duplicate a range of revisions onto the current revision
-jj duplicate '<from>..<to>' --destination @
+# jj:cherrypick:range — duplicate a commit range onto the current revision, inclusive of the lower bound
+jj duplicate '<from>::<to>' --destination @
 
 % jj, push
 

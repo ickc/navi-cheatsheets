@@ -42,9 +42,9 @@ jj restore
 % jj, merge
 
 # jj:merge:upstream — fetch upstream and create a new revision on top of upstream's branch (or rebase the current branch onto it)
-jj git fetch --remote <remote> && jj <strategy> -d <branch>@<remote>
+jj git fetch --remote <remote> && jj <strategy> <branch>@<remote>
 $ remote: echo -e "upstream"
-$ strategy: echo -e "rebase\nnew"
+$ strategy: echo -e "rebase -d\nnew"
 $ branch: echo -e "main\nmaster"
 
 # jj:merge:ff:upstream — fast-forward the local bookmark to upstream and push to origin

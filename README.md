@@ -60,14 +60,14 @@ tool as prefix so navi shows both side by side in fzf:
 | `git` | `jj` | `git.cheat` ↔ `jj.cheat` |
 
 Where the modern tool has no clean equivalent for an operation (e.g.
-`git submodule`, broken-symlink detection), the modern file omits that
-snippet rather than carrying a half-working translation.
+`git submodule`, `git tag`), the modern file omits that snippet rather
+than carrying a half-working translation.
 
 ## Junkyard
 
 `junkyard.cheat` holds snippets that didn't survive the refactor:
 personal paths (`~/git/source/envoy`), defunct tools (gitit, EOL
-Anthroconda modules), hardcoded user/MAC/IP defaults that can't be
+Anaconda modules), hardcoded user/MAC/IP defaults that can't be
 generalized, and duplicates. Review and `rm` whatever you agree should
 go.
 

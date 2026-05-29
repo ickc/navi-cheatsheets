@@ -122,4 +122,4 @@ minify --html-keep-document-tags --html-keep-end-tags --type=html -o <filename> 
 if [[ "$(uname)" == Darwin ]]; then sysctl hw.cachelinesize; else getconf LEVEL1_DCACHE_LINESIZE; fi
 
 # sys:dynamic:link — list dynamically-linked libraries a binary depends on (otool on macOS, readelf on Linux)
-if [[ $(uname) == Darwin ]]; then otool -L <program>; else readelf --needed-libs <program>; fi
+if [[ $(uname) == Darwin ]]; then otool -L <program>; else readelf -dW <program> | grep '(NEEDED)'; fi

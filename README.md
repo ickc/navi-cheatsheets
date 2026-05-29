@@ -1,81 +1,79 @@
 # navi-cheatsheets
 
-Personal [navi](https://github.com/denisidoro/navi) cheatsheets, ported from [sman-snippets](https://github.com/ickc/sman-snippets).
+Personal [navi](https://github.com/denisidoro/navi) cheatsheets.
 
 ## Installation
 
 ```bash
-# Add as a custom cheatsheet path
-export NAVI_PATH="/path/to/navi-cheatsheets"
-
-# Or symlink into navi's default location
-ln -s /path/to/navi-cheatsheets ~/.local/share/navi/cheats/personal
+mkdir -p ~/.local/share/navi
+git clone git@github.com:ickc/navi-cheatsheets.git ~/.local/share/navi/cheats
 ```
 
-## File Organization
+## Layout
 
-Each `.cheat` file corresponds to an original sman `.yml` file:
+Each file groups snippets by tool or theme. Snippet names follow
+`tool:area:verb` (e.g. `git:branch:delete`, `mac:spotlight:disable`,
+`brew:install`).
 
 | File | Topics |
 |------|--------|
-| `bash.cheat` | find, grep, rg, tar, du, ACLs, wget, ghostscript, IP tools, PDF, iperf, etc. |
-| `btrfs.cheat` | btrfs filesystem management, scrub, balance |
-| `git.cheat` | git operations: log, diff, clone, reset, merge, batch, worktree |
-| `hpc.cheat` | HPC environment modules, SLURM, OpenSSL PKCS12 |
-| `jekyll.cheat` | Jekyll serve |
-| `linux.cheat` | Linux admin: mount, firewall-cmd, xrandr, mkfs, systemd |
-| `mac.cheat` | macOS: Finder defaults, Spotlight, diskutil, metadata |
-| `misc.cheat` | pandoc, ffmpeg, whisper, kitty, f3, gitit, cleanup |
-| `package.cheat` | Package managers: suse, rhel, arch, apt, brew, port, nix, conda, pip, etc. |
-| `programming.cheat` | Code cleanup, Jupyter, formatting (ruff, clang-format, rustfmt, shfmt, nixfmt) |
-| `ssh.cheat` | SSH tunnels, rsync, sshfs, wake-on-LAN |
-| `zfs.cheat` | ZFS pool/dataset management, snapshots, send/receive |
+| `acl.cheat` | recursive chgrp/chmod, setgid+sticky workflows |
+| `archive.cheat` | tar/unzip plus streaming http extract |
+| `bash.cheat` | path/PATH inspection, dir summaries, tee redirects, batch convert |
+| `btrfs.cheat` | btrfs device/filesystem/subvolume + scrub + balance |
+| `disk.cheat` | du/df, locate db, md5sum, dd benchmarks, badblocks/SMART/hdparm, f3 |
+| `git.cheat` | git operations across log/diff/clone/remote/submodule/reset/merge/branch/tag/cherry-pick/batch/push/commit/pull/worktree |
+| `hpc.cheat` | Cray PrgEnv modules, Slurm squeue/sbatch, OpenSSL pkcs12 split |
+| `jekyll.cheat` | jekyll serve |
+| `jj.cheat` | jj parallel to git.cheat (see "Modern alternatives" below) |
+| `junkyard.cheat` | snippets queued for deletion; review and prune |
+| `kitty.cheat` | kitty terminal theme switcher |
+| `linux.cheat` | mount, users, power, network, display, kernel, mkfs, udev, vm, firewall, mce |
+| `mac.cheat` | kext, power, finder, metadata, defaults/launchservices, spotlight, apps, disk, system |
+| `media.cheat` | ffmpeg, mediainfo, whisper, imagemagick, yt-dlp |
+| `network.cheat` | local/public IP, http server, wget mirror, samba mount, iperf |
+| `obsidian.cheat` | Obsidian config diff/sort |
+| `package.cheat` | suse/rhel/rpm/arch/apt/mas/nix/devbox/port/brew/pip/conda/pixi/jupyter/go/vscode |
+| `pdf.cheat` | Ghostscript merge/extract, pdfimages, pdftoppm |
+| `programming.cheat` | cleanup, jupyter, python random/format, format:*, pandoc, html minify, sys |
+| `ssh.cheat` | tunnels, rsync, sshfs, sshuttle vpn, wake-on-LAN |
+| `zfs.cheat` | zpool/arc/dataset/snapshot management |
+| `file-search.cheat` ↔ `file-search-modern.cheat` | find / fd (see below) |
+| `text-search.cheat` ↔ `text-search-modern.cheat` | grep / rg (see below) |
+| `text-edit.cheat` ↔ `text-edit-modern.cheat` | sed / sd (see below) |
 
-## Porting Decisions
+## Modern alternatives
 
-### Variable translation
+For find/grep/sed, the classic and modern versions live in parallel files
+with the same section structure, same sequence, and same descriptions.
+Snippet names use the tool as prefix so navi shows both side by side in
+fzf:
 
-| sman syntax | navi equivalent |
-|-------------|-----------------|
-| `<<var>>` | `<var>` (free-text input) |
-| `<<var(opt1,opt2)>>` | `<var>` + `$ var: echo -e "opt1\nopt2"` |
-| `<<var( ,value)>>` | `<var>` + `$ var: echo -e " \nvalue"` (space = disabled) |
-| `<<var#hint>>` | `<var>` + `; hint` comment above `$` line |
+| Classic | Modern | Parallel files |
+|---------|--------|----------------|
+| `find` | `fd` | `file-search.cheat` ↔ `file-search-modern.cheat` |
+| `grep` | `rg` | `text-search.cheat` ↔ `text-search-modern.cheat` |
+| `sed` | `sd` | `text-edit.cheat` ↔ `text-edit-modern.cheat` |
+| `git` | `jj` | `git.cheat` ↔ `jj.cheat` |
 
-Variable names were converted to snake_case (navi requires alphanumeric + underscore).
+The `git`/`jj` pair follows the same naming and relative ordering where
+there is a clean jj equivalent. Git-only operations (e.g. `git submodule`,
+`git tag`) are omitted from `jj.cheat` rather than carrying half-working
+translations.
 
-### Snippet naming
+## Junkyard
 
-Each command's `#` description line preserves the original colon-separated name for searchability:
+`junkyard.cheat` holds snippets that didn't survive the refactor:
+personal paths (`~/git/source/envoy`), defunct tools (gitit, EOL
+Anaconda modules), hardcoded user/MAC/IP defaults that can't be
+generalized, and duplicates. Review and `rm` whatever you agree should
+go.
 
-```
-# find:extension — show counts of all extensions...
-```
+## Conventions
 
-### Snippet nesting
-
-sman's `s r <snippet>` calls are translated to:
-
-```bash
-navi --query "<snippet-name>" --best-match
-```
-
-This invokes navi to find and execute the referenced snippet. When the original passed arguments to `s r`, the referenced command was inlined instead.
-
-### Tag grouping
-
-Related snippets are grouped under `%` tag headers using the pattern `% file_topic, sub_namespace` (e.g., `% bash, find`, `% git, reset`, `% package, arch`).
-
-### Skipped content
-
-The following were not ported:
-
-- **Entire files**: `c3.yml`, `dautil.yml`, `polarbear.yml` (project-specific physics research), `install.yml` (outdated tool installers)
-- **Machine-specific snippets**: references to specific institutional machines, IPs, or VPNs
-- **Obsolete tools**: hub (replaced by gh), flake8/autopep8/isort (replaced by ruff), scipy weave, etc.
-
-### Known limitations
-
-- **"Empty" option UX**: sman allowed `<<flag( ,--delete)>>` where selecting the first (space) option meant "disabled". In navi, this is represented as `$ flag: echo -e " \n--delete"` — the space option appears blank in the fzf selector, which is less discoverable but functionally equivalent.
-- **Cross-snippet calls**: `navi --query ... --best-match` is less robust than sman's direct `s r` invocation — fuzzy matching may pick the wrong snippet if descriptions are similar.
-- **Multi-line commands**: Some complex multi-line sman commands were collapsed to single-line with `&&`/`;` separators for navi compatibility.
+- Snippet names: `tool:area:verb`, snake_case variables.
+- Section tags: `% <file>, <subarea>` (e.g. `% git, log`, `% mac, spotlight`).
+- Variable choices follow navi's `$ name: echo -e "..."` form. Leading
+  space (`echo -e " \nfoo"`) represents the "disabled" option, mirroring
+  the original sman `<<flag( ,foo)>>` UX.
+- Cross-snippet calls use `navi --query "name" --best-match`.

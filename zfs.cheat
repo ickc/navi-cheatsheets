@@ -1,49 +1,52 @@
-% zfs
+% zfs, pool
 
-# zfs:all — show all zfs info
+# zfs:pool:status — print zpool status, iostat, and dataset listing back-to-back
 sudo -v && eval printf %.0s= '{1..'"${COLUMNS:-$(tput cols)}"'}' && sudo zpool status && eval printf %.0s= '{1..'"${COLUMNS:-$(tput cols)}"'}' && sudo zpool iostat && eval printf %.0s= '{1..'"${COLUMNS:-$(tput cols)}"'}' && sudo zpool list && eval printf %.0s= '{1..'"${COLUMNS:-$(tput cols)}"'}' && sudo zfs list
 
-# zfs:im — import a ZFS pool
+# zfs:pool:import — import a pool by name, preferring /dev/disk/by-id on Linux and /var/run on macOS
 if [[ $(uname) == Darwin ]]; then base=/var/run; else base=/dev; fi && sudo zpool import -f -l -d $base/disk/by-id <name> && sudo zpool status
 $ name: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
 
-# zfs:ex — export a ZFS pool
+# zfs:pool:export — export a pool so its disks can be safely detached
 sudo zpool export <name> && sudo zpool status
 $ name: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
 
-# zfs:arc — show ARC stats
-cat /proc/spl/kstat/zfs/arcstats
-
-# zfs:ls — list ZFS snapshots
-sudo zfs list -t snapshot
-
-# zfs:ss — create ZFS snapshot
-sudo zfs snapshot <name>
-
-# zfs:show:compress — get compression stats
-sudo zfs get compression -r
-
-# zfs:sdrc — ZFS send and receive
-sudo zfs send <input>/@<snapshot> | sudo zfs receive <output>/
-$ input: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
-$ output: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
-
-# zfs:version — check zfs version
-if [[ $(uname) == Darwin ]]; then sysctl -a | grep -E '(zfs|spl)\.kext'; else sudo zfs --version; fi
-
-# zfs:space — show zfs space usage, sort by snapshot usage
-sudo zfs list -o space | sort -hk4
-
-# zfs:size — show zfs dataset sizes in bytes
-sudo zfs get -o name,value -Hp used
-
-# zfs:autoexpand — set zpool to auto-expand
+# zfs:pool:autoexpand — enable autoexpand so a pool grows when underlying disks are replaced with larger ones
 sudo zpool set autoexpand=on <pool>
 $ pool: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
 
-# zfs:get — get zpool properties
+# zfs:pool:get — read a zpool property
 sudo zpool get <property>
 $ property: echo -e " \nautoexpand"
 
-# zfs:video:link — create video symlinks
-(cd /Volumes; sudo ln -s RAIDZ48TB/Videos .; sudo ln -s RAIDZ48TB/Videos-original .; sudo ln -s RAIDZ48TB/Videos-original-archive/ .)
+# zfs:version — show ZFS/SPL versions (sysctl on macOS, zfs --version on Linux)
+if [[ $(uname) == Darwin ]]; then sysctl -a | grep -E '(zfs|spl)\.kext'; else sudo zfs --version; fi
+
+% zfs, arc
+
+# zfs:arc:stats — dump raw ARC kstat counters
+cat /proc/spl/kstat/zfs/arcstats
+
+% zfs, dataset
+
+# zfs:dataset:space — list datasets sorted by total snapshot space used
+sudo zfs list -o space | sort -hk4
+
+# zfs:dataset:size — list dataset names with `used` bytes, parsable output
+sudo zfs get -o name,value -Hp used
+
+# zfs:dataset:compression — show compression property recursively for all datasets
+sudo zfs get compression -r
+
+% zfs, snapshot
+
+# zfs:snapshot:ls — list all snapshots
+sudo zfs list -t snapshot
+
+# zfs:snapshot:create — create a snapshot, e.g. tank/data@2025-01-01
+sudo zfs snapshot <name>
+
+# zfs:snapshot:send_recv — pipe a snapshot from one pool/dataset to another
+sudo zfs send <input>/@<snapshot> | sudo zfs receive <output>/
+$ input: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"
+$ output: echo -e "RAIDZ8TB\nRAIDZ12TB\nRAIDZ24TB\nRAIDZ48TB"

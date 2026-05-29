@@ -1,0 +1,85 @@
+% junkyard
+
+# Snippets in this file are on the way out: hardcoded personal paths,
+# obsolete tools, machine-specific defaults, trivial one-liners, or
+# duplicates that survived the refactor. Review and delete what you agree
+# with; promote anything you want to keep back into a real cheat file.
+
+% junkyard, zfs
+
+# zfs:video:link — symlink personal video collections from a specific pool into /Volumes (hardcoded to RAIDZ48TB layout)
+(cd /Volumes; sudo ln -s RAIDZ48TB/Videos .; sudo ln -s RAIDZ48TB/Videos-original .; sudo ln -s RAIDZ48TB/Videos-original-archive/ .)
+
+% junkyard, hpc
+
+# module:load:py2 — load Python 2.7 Anaconda module (Python 2 is EOL; specific anaconda-4.4 module unlikely to still exist)
+module load python/2.7-anaconda-4.4
+
+# module:load:py3 — load Python 3.6 Anaconda module (Python 3.6 is EOL; specific anaconda-4.4 module unlikely to still exist)
+module load python/3.6-anaconda-4.4
+
+% junkyard, package
+
+# nix:update:all — update nix via a hardcoded ~/git/source/envoy pixi task (personal flake layout)
+startsudo
+if [[ $(uname) == Darwin ]]; then
+  cd ~/git/source/envoy
+  pixi run nix-update-all
+fi
+stopsudo
+
+# nix:update:config — update the nix flake config via a hardcoded ~/git/source/envoy pixi task (personal flake layout)
+if [[ $(uname) == Darwin ]]; then
+  cd ~/git/source/envoy
+  pixi run nix-update-config
+fi
+
+% junkyard, git
+
+# git:remove:domain — remove a domain's host keys from ~/.ssh/known_hosts (duplicate of ssh:remove:host_key)
+ssh-keygen -R <domain>
+
+% junkyard, bash
+
+# texcount:md — texcount summary for markdown via texcount_processing from dautil-py (personal, unmaintained dependency)
+texcount_processing <(pandoc '<file>' -s -t latex | texcount -relaxed -)
+
+# clean:trash — clean ~/.local/share/Trash (one-liner, slightly dangerous, less safe than trash-cli)
+rm -rf ~/.local/share/Trash/
+
+% junkyard, programming
+
+# jupyter:start — open Jupyter in an isolated Chrome window using a hardcoded internal IP list (personal network)
+"/Applications/<chrome>.app/Contents/MacOS/<chrome>" -incognito --app=<address>
+$ chrome: echo -e "Chromium\nGoogle Chrome\nGoogle Chrome Canary"
+$ address: echo -e "https://192.168.4.5:8000\nhttps://192.168.4.7:8000\nhttps://192.168.4.8:8000\nhttps://172.22.2.7:8000"
+
+# mypy:stop — stop dmypy daemons across ~/git, hardcoded to a personal conda env (all310-conda-forge)
+(conda activate all310-conda-forge && find ~/git -name .dmypy.json -exec bash -c 'cd "${1%/*}" && dmypy stop' bash {} \;)
+
+# clean:all — chains four navi --query lookups whose target snippet names changed during the refactor
+navi --query "find:ds_store" --best-match; navi --query "find:conflict" --best-match; navi --query "fd:rm:ipycp" --best-match; navi --query "fd:rm:py:aux" --best-match
+
+% junkyard, misc
+
+# gitit:serve — find a gitit `_default.conf` and serve the wiki (gitit's last release was 2017; effectively dead)
+dir="$(find -name _default.conf -exec dirname {} +)"; subdir="$(basename "$dir")"; cd "$dir/.." && gitit -f "$subdir/_default.conf"
+
+# vtt:to:txt — call a personal vtt-to-text python script at ~/git/private/rewind-whisper/src/vtt2txt.py
+~/git/private/rewind-whisper/src/vtt2txt.py '<file>.vtt' -o '<file>.txt'
+
+% junkyard, mac
+
+# default:open — call a personal default-open.sh at ~/git/source/bootstrapping-os-environments/macOS/
+~/git/source/bootstrapping-os-environments/macOS/default-open.sh
+
+# ibooks:path — cd into iBooks' PDF storage location (trivial; not worth a snippet)
+cd "$HOME/Library/Mobile Documents/iCloud~com~apple~iBooks/Documents"
+
+# format:disk — `diskutil list` then partition a disk; mac:diskutil:ls + mac:diskutil:partition does the same in two steps
+diskutil list; diskutil partitionDisk '/dev/disk<N>' GPT JHFS+ '<name>' 100%
+
+% junkyard, linux
+
+# inotify — show fs.inotify before/after sysctl -p and restart dropbox; the dropbox service unit name is hardcoded to user "kolen"
+sysctl fs.inotify; sudo sysctl -p; sysctl fs.inotify; sudo systemctl restart dropbox@kolen.service && sudo systemctl restart system-dropbox.slice

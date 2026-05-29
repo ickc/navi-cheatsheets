@@ -1,35 +1,38 @@
 % btrfs
 
-# btrfs:stats — display statistics for btrfs devices at a mount point
+# btrfs:device:stats — per-device read/write/flush/corruption error counters
 sudo btrfs device stats <mount_point>
 
-# btrfs:show — show detailed info about all btrfs filesystems
+# btrfs:fs:show — show all btrfs filesystems with devices, UUIDs, and sizes
 sudo btrfs filesystem show
 
-# btrfs:list — list all subvolumes within a btrfs filesystem
-sudo btrfs subvolume list -t <path>
-
-# btrfs:df — display disk space usage for a btrfs filesystem
+# btrfs:fs:df — per-block-group space usage (Data/Metadata/System, single/RAID profiles)
 sudo btrfs filesystem df <mount_point>
+
+# btrfs:subvolume:ls — list subvolumes inside a btrfs tree
+sudo btrfs subvolume list -t <path>
 
 % btrfs, scrub
 
-# btrfs:scrub:start — start a scrub operation
+# btrfs:scrub:start — read all data and checksum-verify it in the background
 sudo btrfs scrub start <device_or_mount_point>
 
-# btrfs:scrub:cancel — cancel an ongoing scrub
-sudo btrfs scrub cancel <device_or_mount_point>
-
-# btrfs:scrub:status — check scrub status
+# btrfs:scrub:status — show scrub progress and any detected errors
 sudo btrfs scrub status <device_or_mount_point>
 
-# btrfs:scrub:resume — resume a paused scrub
+# btrfs:scrub:cancel — cancel scrub; state is saved so it can be resumed
+sudo btrfs scrub cancel <device_or_mount_point>
+
+# btrfs:scrub:resume — resume a previously cancelled scrub from saved state
 sudo btrfs scrub resume <device_or_mount_point>
 
 % btrfs, balance
 
-# btrfs:balance:start — start a balance operation
+# btrfs:balance:start — rebalance data and metadata block groups across devices
 sudo btrfs balance start -v -d -m <path>
+
+# btrfs:balance:status — show balance progress
+sudo btrfs balance status <path>
 
 # btrfs:balance:pause — pause an ongoing balance
 sudo btrfs balance pause <path>
@@ -39,6 +42,3 @@ sudo btrfs balance cancel <path>
 
 # btrfs:balance:resume — resume a paused balance
 sudo btrfs balance resume <path>
-
-# btrfs:balance:status — check balance status
-sudo btrfs balance status <path>

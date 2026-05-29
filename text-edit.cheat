@@ -1,0 +1,9 @@
+% text-edit, sed
+
+# sed:files:at:level — in-place substitute on files matching a glob at a specific depth
+find . <ignore_path> -type f -maxdepth <level> -mindepth <level> -name "<name>" -exec sed -i 's/<from>/<to>/g' {} +
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# sed:files:crlf — convert Windows-style CRLF (and stray CR) to LF in every file matching a glob
+find . <ignore_path> -type f -name '<name>' -exec sed -i -e 's/\r\n/\n/g' -e 's/\r/\n/g' {} +
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"

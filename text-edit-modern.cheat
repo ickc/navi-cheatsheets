@@ -1,0 +1,9 @@
+% text-edit-modern, sd
+
+# sd:files:at:level — in-place substitute on files matching a glob at a specific depth
+fd <include_hidden> --exact-depth <level> -t f -g '<name>' -x sd '<from>' '<to>' {}
+$ include_hidden: echo -e " \n-H --no-ignore"
+
+# sd:files:crlf — convert Windows-style CRLF (and stray CR) to LF in every file matching a glob
+fd <include_hidden> -t f -g '<name>' -x sd '\r\n?' '\n' {}
+$ include_hidden: echo -e " \n-H --no-ignore"

@@ -1,0 +1,60 @@
+% network, ip
+
+# ip:public — print this host's public IP (works behind NAT)
+curl <url>
+$ url: echo -e "ipecho.net/plain\nhttp://checkip.amazonaws.com"
+
+# ip:local — print every local IPv4 address keyed by interface
+python3 -c 'import socket, psutil; [print(interface.ljust(10), snic.address.rjust(15)) for interface, snics in psutil.net_if_addrs().items() for snic in snics if snic.family == socket.AF_INET]'
+
+# ip:local:router — print the IP this host uses to reach its default router
+if [[ $(uname) == Darwin ]]; then hostname -i; else (ip route get 1.1.1.1 | grep 1.1.1.1 | awk '{print $7}'); fi
+
+# ip:router — print the default router's IP
+if [[ $(uname) == Darwin ]]; then (route -n get default | grep gateway | awk '{print $2}'); else (ip r | grep default | awk '{print $3}'); fi
+
+# ip:network — print every directly-connected network (e.g. 192.168.1.0/24)
+if [[ $(uname) == Darwin ]]; then (netstat -nr | awk '{print $1}' | grep -E '^[0-9a-f:.]+/[0-9]+$' | sort -u); else (ip r | grep -v default | awk '{print $1}'); fi
+
+# ip:network:scan — list live IPs on a connected network (use ip:network to find one)
+sudo nmap -sn <network>
+
+# ip:mac — print MAC addresses for every interface
+if [[ $(uname) == Darwin ]]; then networksetup -listallhardwareports; else ip link show; fi
+
+% network, http
+
+# http:resolve — follow redirects and print the final URL
+curl -s -o /dev/null -w '%{url_effective}' '<url>'
+
+# http:server — serve cwd over HTTP, optionally only on localhost
+python3 -m http.server <port> <local>
+$ local: echo -e " \n--bind 127.0.0.1"
+
+% network, download
+
+# wget:mirror — mirror a site fully (follow links, convert paths, ignore robots.txt)
+wget -mke robots=off <URL>
+
+# wget:level — like wget:mirror but capped at a recursion depth
+wget -r -l <level> --no-remove-listing -ke robots=off <URL>
+
+% network, samba
+
+# samba:mount — mount a CIFS share with the current user's uid/gid
+sudo mount -t cifs -o username=${USER},uid=$(id -u),gid=$(id -g) //<server>/<name> <mount_point>
+
+# samba:reload — reload smb.conf without restarting the daemon
+sudo smbcontrol all reload-config
+
+% network, iperf
+
+# iperf:server — listen for incoming iperf3 connections
+iperf3 -s
+
+# iperf:client — run iperf3 against a server with configurable buffer, time, parallelism, and bidir mode
+iperf3 -c <ip> -l <size>K -w <size>K -t <time> -P <parallel> <bidir>
+$ size: echo -e "64\n128\n256"
+$ time: echo -e "10\n60"
+$ parallel: echo -e "1"
+$ bidir: echo -e " \n--bidir"

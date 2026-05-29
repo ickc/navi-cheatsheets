@@ -1,0 +1,7 @@
+% kitty, theme
+
+# kitty:theme:solarized:dark — symlink kitty's current-theme.conf to Solarized Dark (Ctrl+Cmd+, reloads on macOS)
+rm -f ~/.config/kitty/current-theme.conf; ln -s themes/Solarized_Dark_Official.conf ~/.config/kitty/current-theme.conf
+
+# kitty:theme:solarized:light — symlink kitty's current-theme.conf to Solarized Light (Ctrl+Cmd+, reloads on macOS)
+rm -f ~/.config/kitty/current-theme.conf; ln -s themes/Solarized_Light_Official.conf ~/.config/kitty/current-theme.conf

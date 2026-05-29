@@ -1,383 +1,46 @@
-% bash, find
+% bash, process
 
-# find:extension — show counts of all extensions inside current directory, if no extension, show name instead. Ignore .git
-find . <ignore_path> -type f | sed -E 's/^.*([./][^./]+)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
-
-$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
-$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
-
-# find:long_extension — similar to fd:ext, but treat the first . as the beginning of ext e.g. .tar.gz. No extension is regarded as empty string
-find . <ignore_path> -type f | sed -E 's/^.*\/[^./]*([^/]*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
-
-# find:part:extension — similar to fd:ext, but ignoring .part
-find . <ignore_path> -type f | grep -o -E '[./][^./]+\.part$'<case_sensitivity>| sort | uniq -c | sort -n
-
-# find:name — find a name pattern, show counts of filenames. Ignore .git
-find . <ignore_path> -type f -name '<name>' | sed -E 's/^.*\/([^/]+)$/\1/g' | sort | uniq -c | sort -n
-
-# find:unread — find unreadable files
-find . \! -readable 2> /dev/null
-
-# find:git — find all git repositories recursively
-find . -name '.git' | sed -E 's/^(.*)\/[^/]*$/\1/g'
-
-# find:git:level — find all git repositories and do a statistics on how depth the levels are
-echo "count\tlevel"; find -name '.git' | awk -F/ '{print NF - 2}' | sort | uniq -c | sort -n
-
-# find:git:ignored:extension — find all git-ignored files and print a stat. on the extensions similar to fd:ext
-git status --porcelain=1 --ignored | grep -E "^\!\!" | sed -E 's/^.*([./][^./]+)[/]?$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
-
-# find:git:ignored:rm — find all git-ignored files and delete them. Note that it is not safe if the pathnames contain special characters
-git status --porcelain=1 --ignored | grep -E "^\!\!" | sed 's/^..//g' | xargs -i rm -rf "{}"
-
-# find:not:git:level — find directories at a level that is not a git repo
-find . -maxdepth <level> -mindepth <level> -type d -exec bash -c '[[ -d "$0/.git" ]] || echo $0' {} \;
-
-# find:dir — find a name pattern and show counts of the parent directories. Ignore .git
-find . <ignore_path> -type f -name '<name>' | sed -E 's/^(.*)\/[^/]*$/\1/g' | sort | uniq -c | sort -n
-
-# find:dir1 — find a name pattern, and show counts per 1st level sub-directory. Ignore .git
-find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2}' | sort | uniq -c | sort -n
-
-# find:dir2 — find a name pattern, and show counts per 2nd level sub-directory. Ignore .git
-find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2"/"$3}' | sort | uniq -c | sort -n
-
-# find:dir3 — find a name pattern, and show counts per 3rd level sub-directory. Ignore .git
-find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2"/"$3"/"$4}' | sort | uniq -c | sort -n
-
-# find:poor:name — find poor pathnames
-find . -exec bash -c 'for name do [[ "$name" =~ ^[a-zA-Z0-9./_-]*$ ]] || echo $name; done' bash {} +
-
-# find:executable — Find executables. Ignore .git
-find . <ignore_path> -type f -executable
-
-# find:empty — find empty files or directories. Ignore .git
-find . <ignore_path> -empty <options>
-
-$ options: echo -e " \n-delete"
-
-# find:conflict — find Dropbox's conflicted copy.
-find . \! -path '*/.dropbox.cache/*' -name '*conflicted copy*' <options>
-
-# find:ds_store — find mac's DS_Store files.
-find . \( -name '._.DS_Store' -o -name '.DS_Store' \) <options>
-
-# find:macos_hidden_files:rm — find mac's auto-created files on external drives and delete them.
-find . \( -name '.Trashes' -o -name '.fseventsd' -o -name '.Spotlight-V100' \) -exec sudo rm -rf {} +
-
-# find:ncol — find number of columns for files with given pattern.
-find . <ignore_path> -type f -name '<name>' -exec awk '{print NF}' {} + | sort -nu
-
-# find:cat:all — find files of a name pattern and cat all
-find . <ignore_path> -type f -name '<name>' -exec <cat_options> {} +
-
-$ cat_options: echo -e "cat\nless"
-
-# find:cat:dir — find files with extension in directories at a certain level and cat & sort together into a file with the same extension besides the directories.
-find . <ignore_path> -mindepth <level> -maxdepth <level> -type d -exec bash -c 'find $0 -name "*.<extension>" | xargs cat | sort > $0.<extension>' {} \;
-
-# find:cat:fzf — find files of a name pattern and cat all to fzf
-find . <ignore_path> -type f -name '<name>' -exec cat {} + | fzf
-
-# find:grep — find files of a name pattern and grep another pattern from them
-find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -HnE <args> '<pattern>' {} +
-
-$ args: echo -e "-A 10\n "
-
-# find:grep:match — find files of a name pattern and grep another pattern from them, show match only, unique.
-find . <ignore_path> -type f -name '<name>' -exec grep -ho '<pattern>' {} + | sort -u
-
-# find:grep:time:ram — assume <pattern> finds output of GNU time, get the row of max. mem. used, cut and sort by the numbers.
-find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -h 'Maximum resident set size' {} + | cut -d' ' -f 6 | sort -n
-
-# find:grep:time — assume <pattern> finds output of GNU time, get the row of time used, cut and sort by the time.
-find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -h 'Elapsed (wall clock) time' {} + | cut -d' ' -f 8 | sort -V
-
-# find:size — find files with a name pattern and print its size
-find . <ignore_path> -type f -name '<name>' -printf "%kKB %p\n" | sort -h
-
-# find:sort:modification_time — find files with a name pattern and sort by modification time. See https://superuser.com/a/546900/1211805
-find . <filter> -printf '%T@,%Tc\t%p\n' | sort -n | sed -E 's/^[^,]+,//'
-
-# find:level:sed — find files with a name pattern at a certain level and run inplace sed substitution on it.
-find . <ignore_path> -type f -maxdepth <level> -mindepth <level> -name "<name>" -exec sed -i 's/<from>/<to>/g' {} +
-
-# find:py:def — find all function definitions in *.py files and print the freq. per function name
-find . <ignore_path> -type f -name '*.py' -exec grep -ohE 'def[ ]+([^(]+)\(' {} + | sort | uniq -c | sort -n
-
-# find:sed:linefeed — Convert carriage return (e.g. from Windows) to line feed
-find . <ignore_path> -type f -name '<name>' -exec sed -i -e 's/\r\n/\n/g' -e 's/\r/\n/g' {} +
-
-# find:md5sum — save md5sum of all files into md5sum.txt
-find . <ignore_path> -type f \! -name 'md5sum.txt' -exec md5sum {} + | sort > md5sum.txt
-
-# find:check:md5sum — find all md5sum.txt and enter its directory to check all files
-find -name 'md5sum.txt' -exec bash -c 'cd ${0%/*}; md5sum -c md5sum.txt' {} \;
-
-# find:tar:xz:extension — find files with a name pattern and compress them as .tar.xz with level 9
-find . <ignore_path> -type f -name '*.<ext>' | XZ_OPT=-9 tar -cJf $(basename $(pwd)).<ext>.tar.xz -T -
-
-# find:tar:xz:txt — find text files with a predefined name pattern and compress them as .txt.tar.xz with level e9
-find . <ignore_path> -type f -regextype posix-egrep -regex ".*/.*(-stdout_[[:digit:]]*|-stderr_[[:digit:]]*|makefile|.txt|.err|.csv|.out|.time|.in)" | XZ_OPT=-e9 tar -cJf $(basename $(pwd)).txt.tar.xz -T -
-
-# find:make:clean — find all makefiles in any sub-directories and run 'make clean'
-find . -type f \( -name GNUmakefile -o -name makefile -o -name Makefile \) -exec bash -c 'for makefile do cd "${makefile%/*}"; make -f "${makefile##*/}" clean; cd -; done' bash {} +
-
-# find:mv — mv files under current directory into directories named after its extensions
-find -maxdepth 1 -type f -exec bash -c 'dir="${0##*.}"; mkdir -p "$dir"; mv "$0" "$dir"' {} \;
-
-# find:open:image — find all images and open it. By default on macOS it will all be opened in one single Preview window.
-find . <ignore_path> -type f \( \
-  -iname '*.tiff' \
-  -o -iname '*.gif' \
-  -o -iname '*.png' \
-  -o -iname '*.jpeg' \
-  -o -iname '*.jpg' \
-  -o -iname '*.pdf' \
-\) -exec open {} +
-
-# find:mv:subdir — find all files in current directory and move them into a subdirectory with the same name without extension
-find . -mindepth 1 -maxdepth 1 -type f -exec bash -c '
-  for file do
-    dir="${file%.*}"
-    mkdir -p "$dir"
-    mv "$file" "$dir/$file"
-  done' bash {} +
-
-# find:symlink:broken — find broken symlink
-find . -xtype l
-
-# find:pandoc — find and run pandoc
-find -name '<pattern>' -exec bash -c 'pandoc -s -o "${0%.*}.<ext>" "$0" <args>' {} \;
-
-% bash, grep
-
-# grep — grep a pattern under current dir.
-grep --color=auto -irHn '<pattern>' .
-
-# grep:email — grep all email patterns from file
-grep -EiEio '\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b' '<filename>'
-
-# grep:taskpaper:tag — show all unique tags in TaskPaper format.
-; hint: filename is a taskpaper file
-grep -o '@[^( ]\+' '<filename>' | sort -u
-
-# grep:unicode — grep all unicode characters from file
-grep --color=auto -P -n '[^\x00-\x7F]' '<filename>'
-
-% bash, rg
-
-# rg:pattern
-rg '<pattern>' --iglob '<file>' --only-matching --no-filename --no-line-number
-
-% bash, tar
-
-# untar — untar a file, can be compressed, to a dir
-mkdir <dir>; tar -xf <filename> -C <dir>
-
-# tar:ls — list the content of a tar file, can be compressed
-tar -tf <filename>
-
-# tar:gz — tar and gzip a dir
-tar -czf <dirname>.tar.gz <dirname>
-
-# tar:xz — tar and xz a dir
-XZ_OPT=-<level> tar -cJf <dirname>.tar.xz <dirname>
-
-$ level: echo -e "e9"
-
-% bash, disk
-
-# du — show sizes of everything up to a certain level using du.
-du -h -d <level> . | sort -h
-
-# create:locate_db — create locate.db
-slocate --database=~/.locate.db
-
-# update:locate_db — update locate.db
-updatedb --require-visibility 0 -o ~/.locate.db
-
-# sort:max — ignore header and show maximum. Assume file is something like a CSV with one row header and first column to be sorted.
-tail -n +2 <filename> | sort -n | tail -n1
-
-% bash, acl
-
-# ls:group — List users in a group name
-lid -g <group>
-
-# chgrp — Change group and add sticky bit recursively
-chgrp -R <group_name> . && chmod -R g+s .
-
-# permission — recursively change ownership, add SetGID, etc.
-<sudo> chown -R <user> . && <sudo> chgrp -R <group> . && find . -type d -exec <sudo> chmod <perm_dir> {} + && find . -type f -exec <sudo> chmod <perm_file> {} +
-
-$ sudo: echo -e " \nsudo"
-$ user: echo -e "kolen\nkhcheung"
-$ group: echo -e "kolen\nkhcheung\npolar"
-$ perm_dir: echo -e "2750\n2755"
-$ perm_file: echo -e "640\n644"
-
-# permission:group — change group recursively, add setgid & sticky bit for directories, and make group-readable recursively.
-<sudo> chgrp -R <group> . && find . -type d -exec <sudo> chmod g+s {} + -exec <sudo> chmod +t {} + && chmod -R g+r .
-
-# permission:group:by:user — For those owned by $USER, change group recursively, add setgid & sticky bit for directories, and make group-readable recursively.
-find . -user "$USER" -exec chgrp -R <group> {} + && find . -user "$USER" -type d -exec chmod g+s {} + -exec chmod +t {} + && find . -user "$USER" -exec chmod g+r {} +
-
-% bash, filesystem
-
-# df — List file system mount points
-df -Th
-
-# write_test — perform write test at 1G/512. test1.img and test2.img will be written temporarily.
-dd if=/dev/zero of=test1.img bs=1G count=1 oflag=dsync && dd if=/dev/zero of=test2.img bs=512 count=1000 oflag=dsync && rm test1.img test2.img
-
-% bash, wget
-
-# download:all — download all from the URL using wget
-wget -mke robots=off <URL>
-
-# download:level — download up to a certian level from the URL using wget
-wget -r -l <level> --no-remove-listing -ke robots=off <URL>
-
-# wget:untar
-wget -qO- '<URL>' | tar -xzf -
-
-# wget:unzip — wget and unzip a zip file, on macOS only.
-wget -qO- '<URL>' | bsdtar -xf-
-
-% bash, gs
-
-# gs:merge — use ghostscript to merge PDFs
-gs -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -sOutputFile="<output>" -f *.pdf
-
-# gs:extract — use ghostscript to extract page range from PDF
-gs -sDEVICE=pdfwrite -dNOPAUSE -dBATCH -dFirstPage=<first> -dLastPage=<last> -sOutputFile='<output>' '<input>'
-
-% bash, misc
-
-# pkill — kill all process of current user
+# bash:pkill:user — kill every process owned by the current user
 pkill -u $USER
 
-# samba — connect to samba on router
-sudo mount -t cifs -o username=${USER},uid=$(id -u),gid=$(id -g) //<server>/<name> <mount_point>
+% bash, path
 
-# samba:reload — reload samba conf
-sudo smbcontrol all reload-config
-
-# badblocks — check badblocks of a device. n for non-destructive read/write, w for write
-sudo badblocks -<destructive>vsb 4096 /dev/<disk>
-
-$ destructive: echo -e "n\nw"
-
-# info:smart
-sudo smartctl -x /dev/<disk>
-
-# info:hdparm
-sudo hdparm -I /dev/<disk>
-
-# path:print — pretty-print PATH
+# bash:path:print — pretty-print a colon-separated env var (PATH, LD_LIBRARY_PATH, ...) one entry per line
 echo $<var> | tr ':' '\n'
+$ var: echo -e "PATH\nLD_LIBRARY_PATH\nMANPATH\nPYTHONPATH"
 
-$ var: echo -e "PATH\nLD_LIBRARY_PATH"
-
-# path:statistics — print stat of PATH, useful for inspecting duplicated paths
+# bash:path:stats — count duplicates in PATH (sorted ascending)
 echo $PATH | tr ':' '\n' | sort | uniq -c | sort -n
 
-# redirect — redirect stdout, stderr seperately while also print to terminal
-{{<command> <outfile>} > >(tee <outfile>.out)} 2> >(tee <outfile>.err)
-
-# url:resolve — resolve url to where it is redirected to
-curl -s -o /dev/null -w '%{url_effective}' '<url>'
-
-# ip:public — check public IP (even if it is behind another router). See https://www.linuxtrainingacademy.com/determine-public-ip-address-command-line-curl/
-curl <url>
-
-$ url: echo -e "ipecho.net/plain\nhttp://checkip.amazonaws.com"
-
-# ip:local — get all local IP addresses
-python3 -c 'import socket, psutil; [print(interface.ljust(10), snic.address.rjust(15)) for interface, snics in psutil.net_if_addrs().items() for snic in snics if snic.family == socket.AF_INET]'
-
-# ip:local:router — get local IP address to router
-if [[ $(uname) == Darwin ]]; then hostname -i; else (ip route get 1.1.1.1 | grep 1.1.1.1 | awk '{print $7}'); fi
-
-# ip:router — get router IP address
-if [[ $(uname) == Darwin ]]; then (route -n get default | grep gateway | awk '{print $2}'); else (ip r | grep default | awk '{print $3}'); fi
-
-# ip:network — get all networks connected to. e.g. 192.168.1.0/24
-if [[ $(uname) == Darwin ]]; then (netstat -nr | awk '{print $1}' | grep -E '^[0-9a-f:.]+/[0-9]+$' | sort -u); else (ip r | grep -v default | awk '{print $1}'); fi
-
-# ip:list:network — list all IP within a connected network. Hint: use ip:network to find out the network first.
-sudo nmap -sn <network>
-
-# ip:mac_address — get mac address
-if [[ $(uname) == Darwin ]]; then networksetup -listallhardwareports; else ip link show; fi
-
-# extract:pdf:images — extract original images from PDF
-mkdir -p "$(dirname '<output_prefix>')"; pdfimages -all -p '<input>' '<output_prefix>'
-
-# pdf:to:images — convert each page of PDF to images using pdftoppm
-mkdir -p "$(dirname '<output_prefix>')"; pdftoppm -r <resolution> -png '<input>' '<output_prefix>'
-
-$ resolution: echo -e "150"
-
-# server — serve current directory
-python3 -m http.server <port> <local>
-
-$ local: echo -e " \n--bind 127.0.0.1"
-
-# iperf:s — testing network performance. Start iperf server listening...
-iperf3 -s
-
-# iperf:c — testing network performance. Start iperf client connecting...
-iperf3 -c <ip> -l <size>K -w <size>K -t <time> -P <parallel> <bidir>
-
-$ size: echo -e "64\n128\n256"
-$ time: echo -e "10\n60"
-$ parallel: echo -e "1"
-$ bidir: echo -e " \n--bidir"
-
-# bit — show OS 64bit or 32bit
-getconf LONG_BIT
-
-# zcompdump:rebuild — rebuild .zcompdump after installing new zsh completions
-rm -f ~/.zcompdump; compinit
-
-# texcount:md — texcount summary info on markdown files using texcount_processing from dautil-py
-texcount_processing <(pandoc '<file>' -s -t latex | texcount -relaxed -)
-
-# directory:summary — In a file with multiple lines of paths, count the occurence of parents at certain level.
+# bash:dir:summary — count how many paths share a common parent at a depth (input: file of paths)
 cut -d/ -f-<level> <file> | sort | uniq -c | sort -n
 
-# directory:grep:summary — similar to directory summary, but filtered by a grep-ing a parent directory first.
+# bash:dir:summary:filter — like bash:dir:summary but restricted to paths under a parent
 grep '^<parent>/' <file> | cut -d/ -f-<level> | sort | uniq -c | sort -n
 
-# batch:convert — batch running a filter command from one file to another with a different parent and extension. Hint—cd into the directory containing the files first!
+% bash, shell
+
+# bash:redirect:tee — run a command, splitting stdout and stderr into separate tee'd log files
+{{<command> <outfile>} > >(tee <outfile>.out)} 2> >(tee <outfile>.err)
+
+# bash:bit — print whether the OS is 32 or 64 bit
+getconf LONG_BIT
+
+# bash:zcompdump:rebuild — drop ~/.zcompdump and rebuild zsh's completion cache
+rm -f ~/.zcompdump; compinit
+
+% bash, csv
+
+# csv:max — skip the header row and print the row with the largest first column (numeric)
+tail -n +2 <filename> | sort -n | tail -n1
+
+% bash, batch
+
+# bash:batch:convert — apply a filter from every *.<ext> in cwd to ../<parent>/*.<out_ext>, optionally dry-run
 mkdir -p '../<parent>'; \
 find . -name '*.<ext>' -exec bash -c '
   for file do
   <echo> <command> <flags_before> "$file" <flags_after> > "../<parent>/${file%.<ext>}.<out_ext>"
   done
 ' bash {} +
-
 $ echo: echo -e "echo\n "
-
-# unzip:to:subdir — unzip to a subdir with the same stem of the zip file
-(file=<file>; unzip "$file" -d "${file%.*}")
-
-# obsidian:diff — diff of config files between 2 .obsidian directories
-for file in app.json appearance.json community-plugins.json core-plugins.json hotkeys.json; do difft <in_dir>/.obsidian/$file <out_dir>/.obsidian/$file; done
-
-# obsidian:sort:json — sort json config file in .obsidian directory
-for file in app.json appearance.json hotkeys.json; do \
-  jq '.' -S < <in_dir>/.obsidian/$file > <in_dir>/.obsidian/$file.out; \
-  mv -f <in_dir>/.obsidian/$file.out <in_dir>/.obsidian/$file; \
-done; \
-for file in community-plugins.json core-plugins.json; do \
-  jq 'sort' < <in_dir>/.obsidian/$file > <in_dir>/.obsidian/$file.out; \
-  mv -f <in_dir>/.obsidian/$file.out <in_dir>/.obsidian/$file; \
-done
-
-$ in_dir: echo -e "."
-
-# clean:trash — clean trash
-rm -rf ~/.local/share/Trash/

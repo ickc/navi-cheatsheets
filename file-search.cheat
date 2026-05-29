@@ -1,0 +1,142 @@
+% file-search, find, extension
+
+# find:ext — count files grouped by extension; for extensionless files use the filename
+find . <ignore_path> -type f | sed -E 's|.*/||; s/^.*(\.[^.]*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
+
+# find:ext:full — count files grouped by full extension; .tar.gz counts whole
+find . <ignore_path> -type f | sed -E 's|.*/||; s/^[^.]+(\..*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
+
+# find:ext:part — count extensions among files ending in .part
+find . <ignore_path> -type f -name '*.part' | sed -E 's|.*/||; s/^[^.]+(\..*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
+
+% file-search, find, name
+
+# find:name — count files matching a glob, by filename
+find . <ignore_path> -type f -name '<name>' | sed -E 's/^.*\/([^/]+)$/\1/g' | sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:unreadable — find files the current user can't read
+find . \! -readable 2> /dev/null
+
+# find:executable — find executable files
+find . <ignore_path> -type f -executable
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:empty — find empty files or directories; optionally delete them
+find . <ignore_path> -empty <options>
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+$ options: echo -e " \n-delete"
+
+# find:symlink:broken — find broken symlinks
+find . -xtype l
+
+# find:bad:names — find paths containing characters outside [a-zA-Z0-9./_-]
+find . -exec bash -c 'for name do [[ "$name" =~ ^[a-zA-Z0-9./_-]*$ ]] || echo $name; done' bash {} +
+
+% file-search, find, dir
+
+# find:dir — count parent directories of files matching a name
+find . <ignore_path> -type f -name '<name>' | sed -E 's/^(.*)\/[^/]*$/\1/g' | sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:dir:1 — count files matching a name, grouped by 1st-level subdirectory
+find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2}' | sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:dir:2 — count files matching a name, grouped by 2nd-level subdirectory
+find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2"/"$3}' | sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:dir:3 — count files matching a name, grouped by 3rd-level subdirectory
+find . <ignore_path> -type f -name '<name>' | awk -F '/' '{print $2"/"$3"/"$4}' | sort | uniq -c | sort -n
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+% file-search, find, repo
+
+# find:repos — list every .git directory's parent (i.e. every git repo)
+find . -name '.git' | sed -E 's/^(.*)\/[^/]*$/\1/g'
+
+# find:repos:depth — count git repos by depth from cwd
+echo "count\tlevel"; find -name '.git' | awk -F/ '{print NF - 2}' | sort | uniq -c | sort -n
+
+# find:not:repo:level — directories at a specific depth that aren't git repos
+find . -maxdepth <level> -mindepth <level> -type d -exec bash -c '[[ -d "$0/.git" ]] || echo $0' {} \;
+
+# find:gitignored:ext — count extensions among git-ignored files
+git status --porcelain=1 --ignored | grep -E "^\!\!" | sed -E 's/^.*([./][^./]+)[/]?$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
+$ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
+
+# find:gitignored:rm — delete every git-ignored file (unsafe with special characters)
+git status --porcelain=1 --ignored | grep -E "^\!\!" | sed 's/^..//g' | xargs -i rm -rf "{}"
+
+% file-search, find, macos
+
+# find:dropbox:conflict — find Dropbox's "conflicted copy" files; optionally delete
+find . \! -path '*/.dropbox.cache/*' -name '*conflicted copy*' <options>
+$ options: echo -e " \n-delete"
+
+# find:macos:dsstore — find macOS .DS_Store metadata files; optionally delete
+find . \( -name '._.DS_Store' -o -name '.DS_Store' \) <options>
+$ options: echo -e " \n-delete"
+
+# find:macos:hidden:rm — recursively delete macOS auto-created junk on external drives
+find . \( -name '.Trashes' -o -name '.fseventsd' -o -name '.Spotlight-V100' \) -exec sudo rm -rf {} +
+
+% file-search, find, stats
+
+# find:ncol — distinct column counts (awk NF) across files matching a name
+find . <ignore_path> -type f -name '<name>' -exec awk '{print NF}' {} + | sort -nu
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:size — print sizes of files matching a name, sorted ascending
+find . <ignore_path> -type f -name '<name>' -printf "%kKB %p\n" | sort -h
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:sort:mtime — sort matched files by modification time (oldest first)
+find . <filter> -printf '%T@,%Tc\t%p\n' | sort -n | sed -E 's/^[^,]+,//'
+
+% file-search, find, action
+
+# find:cat — view the concatenation of files matching a name
+find . <ignore_path> -type f -name '<name>' -exec <viewer> {} +
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+$ viewer: echo -e "cat\nless"
+
+# find:cat:dir — for each directory at a depth, cat+sort its files of a given extension into a sibling file
+find . <ignore_path> -mindepth <level> -maxdepth <level> -type d -exec bash -c 'find $0 -name "*.<extension>" | xargs cat | sort > $0.<extension>' {} \;
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:cat:fzf — cat all matching files into fzf for interactive browsing
+find . <ignore_path> -type f -name '<name>' -exec cat {} + | fzf
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:mv:by:ext — move every file in cwd into a subdirectory named after its extension
+find -maxdepth 1 -type f -exec bash -c 'dir="${0##*.}"; mkdir -p "$dir"; mv "$0" "$dir"' {} \;
+
+# find:mv:by:basename — move every file in cwd into a subdirectory with the same name (minus extension)
+find . -mindepth 1 -maxdepth 1 -type f -exec bash -c '
+  for file do
+    dir="${file%.*}"
+    mkdir -p "$dir"
+    mv "$file" "$dir/$file"
+  done' bash {} +
+
+# find:image:open — open all images (tiff/gif/png/jpg/jpeg/pdf) found below cwd (macOS opens them all in Preview)
+find . <ignore_path> -type f \( \
+  -iname '*.tiff' \
+  -o -iname '*.gif' \
+  -o -iname '*.png' \
+  -o -iname '*.jpeg' \
+  -o -iname '*.jpg' \
+  -o -iname '*.pdf' \
+\) -exec open {} +
+$ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
+
+# find:make:clean — `make clean` in every directory containing a Makefile (any case)
+find . -type f \( -name GNUmakefile -o -name makefile -o -name Makefile \) -exec bash -c 'for makefile do cd "${makefile%/*}"; make -f "${makefile##*/}" clean; cd -; done' bash {} +

@@ -1,10 +1,10 @@
 % jj, log
 
 # jj:log:authors — count revisions per author (shortlog-style)
-jj log --no-graph -T 'author.email() ++ "\n"' -r 'all()' | sort | uniq -c | sort -rn
+jj log --no-graph -T 'author.name() ++ "\n"' -r 'all() ~ root()' | sort | uniq -c | sort -rn
 
 # jj:log:identities — list every (name, email) pair across all revisions
-jj log --no-graph -T 'author.name() ++ " <" ++ author.email() ++ ">\n"' -r 'all()' | sort -u
+jj log --no-graph -T 'author.name() ++ " <" ++ author.email() ++ ">\n"' -r 'all() ~ root()' | sort -u
 
 % jj, diff
 

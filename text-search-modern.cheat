@@ -1,13 +1,13 @@
 % text-search-modern, rg
 
-# rg:recursive — recursive search with line numbers and filenames
+# rg:recursive — case-insensitive recursive search with line numbers
 rg -i '<pattern>'
 
-# rg:files — grep a pattern only inside files matching a glob
+# rg:files — search for a pattern only inside files matching a glob
 rg <args> -g '<name>' '<pattern>'
 $ args: echo -e " \n-A 10"
 
-# rg:files:match — same as rg:files but show only the matched portion, sorted and unique
+# rg:files:match — same as the file-glob search but show only the matched portion, sorted and unique
 rg -oN --no-filename -g '<name>' '<pattern>' | sort -u
 
 # rg:gnu:time:mem — collect "Maximum resident set size" from GNU time logs and sort by KB

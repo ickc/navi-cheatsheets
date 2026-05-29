@@ -5,7 +5,7 @@ fd <include_hidden> -t f | sd '^.*([./][^./]+)$' '$1'<case_sensitivity>| sort | 
 $ include_hidden: echo -e " \n-H --no-ignore"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
 
-# fd:ext:full — like fd:ext but treat the first . as the start of the extension (so .tar.gz counts whole)
+# fd:ext:full — count files grouped by full extension; .tar.gz counts whole
 fd <include_hidden> -t f | sd '^.*/[^./]*([^/]*)$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
 $ include_hidden: echo -e " \n-H --no-ignore"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
@@ -104,7 +104,7 @@ $ include_hidden: echo -e " \n-H --no-ignore"
 
 % file-search-modern, fd, action
 
-# fd:cat — cat (or bat) the concatenation of files matching a name
+# fd:cat — view the concatenation of files matching a name
 fd <include_hidden> -t f -g '<name>' -X <viewer>
 $ include_hidden: echo -e " \n-H --no-ignore"
 $ viewer: echo -e "cat\nbat"

@@ -5,7 +5,7 @@ find . <ignore_path> -type f | sed -E 's/^.*([./][^./]+)$/\1/'<case_sensitivity>
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
 
-# find:ext:full — like find:ext but treat the first . as the start of the extension (so .tar.gz counts whole)
+# find:ext:full — count files grouped by full extension; .tar.gz counts whole
 find . <ignore_path> -type f | sed -E 's/^.*\/[^./]*([^/]*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
@@ -103,7 +103,7 @@ find . <filter> -printf '%T@,%Tc\t%p\n' | sort -n | sed -E 's/^[^,]+,//'
 
 % file-search, find, action
 
-# find:cat — cat (or less) the concatenation of files matching a name
+# find:cat — view the concatenation of files matching a name
 find . <ignore_path> -type f -name '<name>' -exec <viewer> {} +
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 $ viewer: echo -e "cat\nless"

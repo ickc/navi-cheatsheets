@@ -1,14 +1,14 @@
 % text-search, grep
 
-# grep:recursive — case-insensitive recursive grep with line numbers
+# grep:recursive — case-insensitive recursive search with line numbers
 grep --color=auto -irHn '<pattern>' .
 
-# grep:files — grep a pattern only inside files matching a name glob
+# grep:files — search for a pattern only inside files matching a glob
 find . <ignore_path> -type f -name '<name>' -exec grep --color=auto -HnE <args> '<pattern>' {} +
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 $ args: echo -e " \n-A 10"
 
-# grep:files:match — same as grep:files but show only the matched portion, sorted and unique
+# grep:files:match — same as the file-glob search but show only the matched portion, sorted and unique
 find . <ignore_path> -type f -name '<name>' -exec grep -ho '<pattern>' {} + | sort -u
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 

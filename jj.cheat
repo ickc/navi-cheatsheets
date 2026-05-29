@@ -27,7 +27,7 @@ jj git remote add <remote> <URL>
 jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> && jj edit <branch>
 
 # jj:reset:upstream — move a local bookmark to upstream's head and force-push to origin
-jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> && jj git push --remote origin --bookmark <branch> --allow-backwards
+jj git fetch --remote <remote> && jj bookmark set <branch> -r <branch>@<remote> --allow-backwards && jj git push --remote origin --bookmark <branch>
 $ remote: echo -e "upstream"
 $ branch: echo -e "main\nmaster"
 
@@ -64,8 +64,8 @@ jj duplicate '<from>..<to>' --destination @
 
 % jj, push
 
-# jj:push:force — push the current bookmark, allowing the remote to move backwards
-jj git push --bookmark <branch> --allow-backwards
+# jj:push:force — push the current bookmark (jj push is always force-with-lease; run jj git fetch first if it is rejected)
+jj git push --bookmark <branch>
 $ branch: echo -e "main\nmaster"
 
 % jj, commit

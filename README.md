@@ -47,10 +47,10 @@ Each file groups snippets by tool or theme. Snippet names follow
 
 ## Modern alternatives
 
-For the four tools where a modern Rust-flavored replacement exists, the
-classic and modern versions live in parallel files with the same section
-structure, same sequence, and same descriptions. Snippet names use the
-tool as prefix so navi shows both side by side in fzf:
+For find/grep/sed, the classic and modern versions live in parallel files
+with the same section structure, same sequence, and same descriptions.
+Snippet names use the tool as prefix so navi shows both side by side in
+fzf:
 
 | Classic | Modern | Parallel files |
 |---------|--------|----------------|
@@ -59,9 +59,10 @@ tool as prefix so navi shows both side by side in fzf:
 | `sed` | `sd` | `text-edit.cheat` ↔ `text-edit-modern.cheat` |
 | `git` | `jj` | `git.cheat` ↔ `jj.cheat` |
 
-Where the modern tool has no clean equivalent for an operation (e.g.
-`git submodule`, `git tag`), the modern file omits that snippet rather
-than carrying a half-working translation.
+The `git`/`jj` pair follows the same naming and relative ordering where
+there is a clean jj equivalent. Git-only operations (e.g. `git submodule`,
+`git tag`) are omitted from `jj.cheat` rather than carrying half-working
+translations.
 
 ## Junkyard
 

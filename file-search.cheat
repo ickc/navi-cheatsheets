@@ -1,17 +1,17 @@
 % file-search, find, extension
 
 # find:ext — count files grouped by extension; for extensionless files use the filename
-find . <ignore_path> -type f | sed -E 's/^.*([./][^./]+)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
+find . <ignore_path> -type f | sed -E 's|.*/||; s/^.*(\.[^.]*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
 
 # find:ext:full — count files grouped by full extension; .tar.gz counts whole
-find . <ignore_path> -type f | sed -E 's/^.*\/[^./]*([^/]*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
+find . <ignore_path> -type f | sed -E 's|.*/||; s/^[^.]+(\..*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
 
 # find:ext:part — count extensions among files ending in .part
-find . <ignore_path> -type f | grep -o -E '[./][^./]+\.part$'<case_sensitivity>| sort | uniq -c | sort -n
+find . <ignore_path> -type f -name '*.part' | sed -E 's|.*/||; s/^[^.]+(\..*)$/\1/'<case_sensitivity>| sort | uniq -c | sort -n
 $ ignore_path: echo -e " \n\\! -path '*/.git/*' \\! -path '*/.*/*'"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
 

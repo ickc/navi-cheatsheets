@@ -1,17 +1,17 @@
 % file-search-modern, fd, extension
 
 # fd:ext — count files grouped by extension; for extensionless files use the filename
-fd <include_hidden> -t f | sd '^.*([./][^./]+)$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
+fd <include_hidden> -t f --format '{/}' | sd '^.*(\.[^.]*)$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
 $ include_hidden: echo -e " \n-H --no-ignore"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
 
 # fd:ext:full — count files grouped by full extension; .tar.gz counts whole
-fd <include_hidden> -t f | sd '^.*/[^./]*([^/]*)$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
+fd <include_hidden> -t f --format '{/}' | sd '^[^.]+(\..*)$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
 $ include_hidden: echo -e " \n-H --no-ignore"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
 
 # fd:ext:part — count extensions among files ending in .part
-fd <include_hidden> -t f -e part --format '{/}' | rg -o '[./][^./]+\.part$'<case_sensitivity>| sort | uniq -c | sort -n
+fd <include_hidden> -t f -e part --format '{/}' | sd '^[^.]+(\..*)$' '$1'<case_sensitivity>| sort | uniq -c | sort -n
 $ include_hidden: echo -e " \n-H --no-ignore"
 $ case_sensitivity: echo -e " \n| tr '[:upper:]' '[:lower:]' "
 

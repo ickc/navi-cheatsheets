@@ -39,12 +39,12 @@ $ sync: echo -e " \n--sync"
 # jupyter:notebook:start — start classic Jupyter Notebook on a fixed port
 jupyter notebook --no-browser --port=8989
 
-# jupyter:lab:start — activate a conda env then start JupyterLab
-micromamba activate <env> && jupyter lab
+# jupyter:lab:start — start JupyterLab inside a conda env
+micromamba run -n <env> jupyter lab
 $ env: echo -e "jupyterlab"
 
-# jupyter:hub:start — activate a conda env then start a local JupyterHub from ~/.jupyter/jupyterhub_config.py
-micromamba activate <env> && jupyterhub -f=~/.jupyter/jupyterhub_config.py
+# jupyter:hub:start — start a local JupyterHub from ~/.jupyter/jupyterhub_config.py inside a conda env
+micromamba run -n <env> jupyterhub -f="${JUPYTER_CONFIG_DIR}/jupyterhub_config.py"
 $ env: echo -e "jupyterlab"
 
 # ipython:cluster:start — start ipcluster with the MPI engine launcher and N processes

@@ -423,10 +423,10 @@ micromamba update --all
 micromamba clean --all -y
 
 # conda:batch — run a command serially inside every conda env (including base)
-micromamba env list --json | jq -r '.envs[]' | xargs -i -n1 -P1 bash -c 'eval "$(micromamba shell hook --shell bash)" && micromamba activate {} && <command>'
+micromamba env list --json | jq -r '.envs[]' | xargs -i -n1 -P1 micromamba run -p {} bash -c '<command>'
 
 # conda:batch:env — run a command serially inside every conda env except base
-micromamba env list --json | jq -r '.envs[]' | grep '/envs/' | xargs -i -n1 -P1 bash -c 'eval "$(micromamba shell hook --shell bash)" && micromamba activate {} && <command>'
+micromamba env list --json | jq -r '.envs[]' | grep '/envs/' | xargs -i -n1 -P1 micromamba run -p {} bash -c '<command>'
 
 # conda:batch:remove:orphan — orphan-clean across every non-base env (see conda/conda#62)
 command='micromamba update --all' navi --query "conda:batch:env" --best-match
@@ -460,10 +460,7 @@ jupyter labextension update --all
 jupyter kernelspec list
 
 # jupyter:ipykernel:install — register a conda env as a named ipykernel kernel
-(
-  micromamba activate '<name>' &&
-  python -m ipykernel install --user --name '<name>' --display-name '<name>'
-)
+micromamba run -n '<name>' python -m ipykernel install --user --name '<name>' --display-name '<name>'
 
 % package, go
 

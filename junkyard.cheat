@@ -55,7 +55,7 @@ $ chrome: echo -e "Chromium\nGoogle Chrome\nGoogle Chrome Canary"
 $ address: echo -e "https://192.168.4.5:8000\nhttps://192.168.4.7:8000\nhttps://192.168.4.8:8000\nhttps://172.22.2.7:8000"
 
 # mypy:stop — stop dmypy daemons across ~/git, hardcoded to a personal conda env (all310-conda-forge)
-(micromamba activate all310-conda-forge && find ~/git -name .dmypy.json -exec bash -c 'cd "${1%/*}" && dmypy stop' bash {} \;)
+micromamba run -n all310-conda-forge find ~/git -name .dmypy.json -exec bash -c 'cd "${1%/*}" && dmypy stop' bash {} \;
 
 # clean:all — chains four navi --query lookups whose target snippet names changed during the refactor
 navi --query "find:ds_store" --best-match; navi --query "find:conflict" --best-match; navi --query "fd:rm:ipycp" --best-match; navi --query "fd:rm:py:aux" --best-match

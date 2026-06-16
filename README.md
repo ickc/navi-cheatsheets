@@ -2,6 +2,31 @@
 
 Personal [navi](https://github.com/denisidoro/navi) cheatsheets.
 
+Install navi and its dependency fzf first if not already:
+
+For system with Python 3.7+:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ickc/envoy/main/install/fzf.py | python3 - install
+curl -fsSL https://raw.githubusercontent.com/ickc/envoy/main/install/navi.py | python3 - install
+```
+
+Or bootstrap uv for newer version of python if needed:
+
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$PATH:$HOME/.local/bin"
+uv run --managed-python https://raw.githubusercontent.com/ickc/envoy/refs/heads/main/install/fzf.py install
+uv run --managed-python https://raw.githubusercontent.com/ickc/envoy/refs/heads/main/install/navi.py install
+```
+
+Then add these to your rc files,
+
+```sh
+export PATH="$PATH:$HOME/.local/opt/$(uname -sm | tr ' ' -)/bin"
+eval "$(navi widget bash)"
+```
+
 ## Installation
 
 ```bash

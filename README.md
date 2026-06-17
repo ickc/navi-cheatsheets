@@ -11,13 +11,17 @@ curl -fsSL https://raw.githubusercontent.com/ickc/envoy/main/install/fzf.py | py
 curl -fsSL https://raw.githubusercontent.com/ickc/envoy/main/install/navi.py | python3 - install
 ```
 
-Or bootstrap uv for newer version of python if needed:
+Or bootstrap pixi for newer version of python if needed:
 
 ```sh
-curl -LsSf https://astral.sh/uv/install.sh | sh
-export PATH="$PATH:$HOME/.local/bin"
-uv run --managed-python https://raw.githubusercontent.com/ickc/envoy/refs/heads/main/install/fzf.py install
-uv run --managed-python https://raw.githubusercontent.com/ickc/envoy/refs/heads/main/install/navi.py install
+# bootstrap pixi first
+export PIXI_HOME="${HOME}/.local/opt/$(uname -sm | tr ' ' -)/pixi"
+export PIXI_BIN_DIR="${PIXI_HOME}/bin"
+export PIXI_NO_PATH_UPDATE=1
+curl -fsSL https://pixi.sh/install.sh | sh
+# then run it like this:
+curl -fsSL https://raw.githubusercontent.com/ickc/envoy/main/install/fzf.py | "${PIXI_BIN_DIR}/pixi" exec --spec python python3 - install
+curl -fsSL https://raw.githubusercontent.com/ickc/envoy/main/install/navi.py | "${PIXI_BIN_DIR}/pixi" exec --spec python python3 - install
 ```
 
 Then add these to your rc files,

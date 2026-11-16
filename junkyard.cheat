@@ -70,8 +70,8 @@ dir="$(find -name _default.conf -exec dirname {} +)"; subdir="$(basename "$dir")
 
 % junkyard, mac
 
-# default:open — call a personal default-open.sh at ~/git/source/bootstrapping-os-environments/macOS/
-~/git/source/bootstrapping-os-environments/macOS/default-open.sh
+# default:open — call a personal default-open.sh in the envoy clone ($XDG_DATA_HOME/envoy/macOS/)
+"$XDG_DATA_HOME/envoy/macOS/default-open.sh"
 
 # ibooks:path — cd into iBooks' PDF storage location (trivial; not worth a snippet)
 cd "$HOME/Library/Mobile Documents/iCloud~com~apple~iBooks/Documents"
